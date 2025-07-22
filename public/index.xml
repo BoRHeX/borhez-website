@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>My New Hugo Site</title>
-    <link>https://example.org/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on My New Hugo Site</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 22 Jul 2025 00:00:00 +0200</lastBuildDate>
-    <atom:link href="https://example.org/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Welcome to Knowledge-Based Currency (KBC)</title>
-      <link>https://example.org/posts/welcome/</link>
+      <link>http://localhost:1313/posts/welcome/</link>
       <pubDate>Tue, 22 Jul 2025 00:00:00 +0200</pubDate>
-      <guid>https://example.org/posts/welcome/</guid>
+      <guid>http://localhost:1313/posts/welcome/</guid>
       <description>&lt;p&gt;Welcome to the official KBC hub by &lt;strong&gt;Master BoRHeZ&lt;/strong&gt;.&lt;/p&gt;&#xA;&lt;p&gt;Here we share knowledge as currency, truth as value, and light as freedom.&lt;/p&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;Knowing is investing.&lt;/p&gt;&lt;/blockquote&gt;</description>
     </item>
   </channel>
