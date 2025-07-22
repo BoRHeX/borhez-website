@@ -1,0 +1,9 @@
+baseURL = "https://borhez.com/"
+languageCode = "en-us"
+title = "KBC by Master BoRHeZ"
+theme = "PaperMod"
+
+[params]
+author = "Master BoRHeZ"
+description = "The official Knowledge-Based Currency (KBC) repository"
+defaultTheme = "auto"
