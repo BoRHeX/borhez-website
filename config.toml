@@ -7,3 +7,42 @@ theme = "PaperMod"
 author = "Master BoRHeZ"
 description = "The official Knowledge-Based Currency (KBC) repository"
 defaultTheme = "auto"
+
+# Navigation menus for the main site.  These entries appear in the top
+# navigation bar and link to pages defined under `content/`.
+[menu]
+  [[menu.main]]
+    identifier = "home"
+    name = "Home"
+    url = "/"
+    weight = 1
+
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 2
+
+  [[menu.main]]
+    identifier = "kchain"
+    name = "K‑Chain"
+    url = "/k-chain/"
+    weight = 3
+
+  [[menu.main]]
+    identifier = "resources"
+    name = "Resources"
+    url = "/resources/"
+    weight = 4
+
+  [[menu.main]]
+    identifier = "blog"
+    name = "Blog"
+    url = "/posts/"
+    weight = 5
+
+  [[menu.main]]
+    identifier = "get-involved"
+    name = "Get Involved"
+    url = "/get-involved/"
+    weight = 6
