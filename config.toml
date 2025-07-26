@@ -6,4 +6,94 @@ theme = "PaperMod"
 [params]
 author = "Master BoRHeZ"
 description = "The official Knowledge-Based Currency (KBC) repository"
-defaultTheme = "auto"
+defaultTheme = "dark"
+
+  # Label settings control the logo in the top-left of the header.
+  [params.label]
+    # Path to the logo file in the static directory (gold on black).
+    icon = "images/logo-gold.png"
+    # Height of the logo in pixels.
+    iconHeight = 40
+    # Set text to empty to suppress duplicate title next to the logo; the site title will still appear as tooltip.
+    text = ""
+
+  # Provide favicons in different sizes.  These files live under static/images/.
+  [params.assets]
+    favicon = "images/logo-gold.png"
+    favicon16x16 = "images/favicon-16x16.png"
+    favicon32x32 = "images/favicon-32x32.png"
+    apple_touch_icon = "images/logo-gold.png"
+
+  # Social links displayed via the social_icons partial.
+  [[params.socialIcons]]
+    name = "twitter"
+    title = "X"
+    url = "https://x.com/BoRHeX"
+
+  [[params.socialIcons]]
+    name = "youtube"
+    title = "YouTube"
+    url = "https://youtube.com/@satoshimamoru3604"
+
+# Navigation menus for the main site.  These entries appear in the top
+# navigation bar and link to pages defined under `content/`.
+[menu]
+  [[menu.main]]
+    identifier = "home"
+    name = "Home"
+    url = "/"
+    weight = 1
+
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 2
+
+  [[menu.main]]
+    identifier = "kchain"
+    name = "K‑Chain"
+    url = "/k-chain/"
+    weight = 3
+
+  [[menu.main]]
+    identifier = "lightweb"
+    name = "LightWeb"
+    url = "/lightweb/"
+    weight = 4
+
+  [[menu.main]]
+    identifier = "oracle-ai"
+    name = "Oracle AI"
+    url = "/oracle-ai/"
+    weight = 5
+
+  [[menu.main]]
+    identifier = "mvs"
+    name = "MVS"
+    url = "/mvs/"
+    weight = 6
+
+  [[menu.main]]
+    identifier = "resources"
+    name = "Resources"
+    url = "/resources/"
+    weight = 7
+
+  [[menu.main]]
+    identifier = "blog"
+    name = "Blog"
+    url = "/posts/"
+    weight = 8
+
+  [[menu.main]]
+    identifier = "get-involved"
+    name = "Get Involved"
+    url = "/get-involved/"
+    weight = 9
+
+  [[menu.main]]
+    identifier = "contact"
+    name = "Contact"
+    url = "/contact/"
+    weight = 10
