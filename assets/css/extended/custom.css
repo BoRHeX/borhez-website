@@ -1,0 +1,81 @@
+/* Custom color scheme and form styling for KBC site */
+
+/* Light theme overrides */
+:root {
+  --theme: #ffffff;
+  --entry: #f8f8f8;
+  --primary: #0a0a0a;
+  --secondary: #d4af37; /* gold accent */
+  --tertiary: #8b0000; /* blood red accent */
+  --content: #0a0a0a;
+  --border: #e0e0e0;
+}
+
+/* Dark theme overrides */
+.dark {
+  --theme: #0a0a0a;      /* matte black background */
+  --entry: #121212;      /* slightly lighter card background */
+  --primary: #f5f5f5;    /* main text color */
+  --secondary: #d4af37;  /* gold accent color */
+  --tertiary: #8b0000;   /* blood red tertiary accent */
+  --content: #f5f5f5;    /* headings and highlighted text */
+  --border: #2f2f2f;     /* border color */
+  --code-block-bg: #1e1e1e;
+  --code-bg: #111111;
+}
+
+/* Contact form styles */
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--entry);
+  color: var(--primary);
+}
+
+.contact-form input[type="submit"] {
+  background-color: var(--secondary);
+  color: var(--theme);
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.contact-form input[type="submit"]:hover {
+  background-color: var(--tertiary);
+}
+
+/* Subtle background logo on the home page */
+.home-bg {
+  position: relative;
+  padding-top: 2rem;
+}
+
+.home-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/images/logo-gold.png") no-repeat center 50px;
+  background-size: 50%;
+  opacity: 0.05;
+  z-index: -1;
+}
+
+/* Site alert (Under Construction badge) */
+.site-alert {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.3rem 0.6rem;
+  background-color: var(--tertiary);
+  color: var(--theme);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  z-index: 1000;
+}
