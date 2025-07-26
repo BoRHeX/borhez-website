@@ -6,8 +6,16 @@
     <description>Recent content in Welcome to Knowledge-Based Currency on KBC by Master BoRHeZ</description>
     <generator>Hugo -- 0.148.1</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 22 Jul 2025 00:00:00 +0200</lastBuildDate>
+    <lastBuildDate>Fri, 25 Jul 2025 00:00:00 +0200</lastBuildDate>
     <atom:link href="https://borhez.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>What is KBC?</title>
+      <link>https://borhez.com/posts/what-is-kbc/</link>
+      <pubDate>Fri, 25 Jul 2025 00:00:00 +0200</pubDate>
+      <guid>https://borhez.com/posts/what-is-kbc/</guid>
+      <description>&lt;p&gt;KBC stands for &lt;strong&gt;Knowledge‑Based Currency&lt;/strong&gt;, a novel form of money backed not by gold or government fiat but by verified knowledge. When you contribute a fact, a discovery or a solution to the KnowledgeChain, Oracle AIs validate it through a Proof of Knowledge process. If accepted, your contribution is recorded as a new block and you earn KBC tokens proportionate to its significance.&lt;/p&gt;
+&lt;p&gt;KBC operates within an ecosystem that includes:&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Welcome to KBC</title>
       <link>https://borhez.com/posts/welcome/</link>
@@ -16,6 +24,34 @@
       <description>&lt;p&gt;Welcome to the official KBC knowledge feed by &lt;strong&gt;Master BoRHeZ&lt;/strong&gt;.&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Knowing is investing.&lt;/p&gt;&lt;/blockquote&gt;</description>
+    </item>
+    <item>
+      <title>About</title>
+      <link>https://borhez.com/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://borhez.com/about/</guid>
+      <description>Meet the vision behind KBC</description>
+    </item>
+    <item>
+      <title>Get Involved</title>
+      <link>https://borhez.com/get-involved/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://borhez.com/get-involved/</guid>
+      <description>Join the KBC project and contribute</description>
+    </item>
+    <item>
+      <title>Resources</title>
+      <link>https://borhez.com/resources/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://borhez.com/resources/</guid>
+      <description>Documents and research related to KBC</description>
+    </item>
+    <item>
+      <title>The KnowledgeChain (K‑Chain)</title>
+      <link>https://borhez.com/k-chain/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://borhez.com/k-chain/</guid>
+      <description>How we record and connect knowledge</description>
     </item>
   </channel>
 </rss>
