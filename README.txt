@@ -1,34 +1,33 @@
-This patch provides the necessary files to integrate Firebase email/password
-authentication into your Hugo-based website.  Drop the contents of the
-`auth_patch` directory into your site's root (merging with existing
-`layouts` and `static` directories) and ensure your configuration
-enables the authentication widget.
+This patch adds a user authentication widget to your Hugo site without
+overwriting your existing layout.  It contains a partial template
+(`layouts/partials/user-auth.html`) that renders an email/password
+login form with register, login and logout buttons.  To activate the
+widget:
 
-Files included:
+1. Copy the `layouts/partials/user-auth.html` file from this patch into
+   your site's `layouts/partials/` directory.  For example:
 
-* `layouts/_default/baseof.html` – A simple base layout that renders
-  your page content and conditionally injects the user authentication
-  widget when `params.auth` is true in your config.  It also loads
-  the Firebase and auth scripts at the bottom of the page.
+       cp -R auth_form_patch/layouts/partials/* your-site/layouts/partials/
 
-* `layouts/partials/user-auth.html` – The authentication widget.  It
-  contains email and password fields, buttons for registration,
-  login and logout, and status/error messages.  You can include this
-  partial in any template with `{{ partial "user-auth.html" . }}`.
+2. Open your site's `layouts/_default/baseof.html` (or the
+   corresponding layout file from your theme) and insert the
+   following snippet just before the closing `</body>` tag:
 
-Usage:
+       {{ partial "user-auth.html" . }}
+       <script type="module" src="/js/firebase-config.js"></script>
+       <script type="module" src="/js/auth.js"></script>
 
-1. Copy the files into your Hugo project:
+   This will render the widget and load your Firebase scripts on every
+   page.  If you wish to enable it conditionally, wrap the partial
+   call in an `if` block using `{{ if .Site.Params.auth }}`.
 
-       cp -R auth_patch/layouts/* your-site/layouts/
-       cp -R auth_patch/static/js/* your-site/static/js/
+3. Ensure you have populated `/static/js/firebase-config.js` with your
+   Firebase project credentials and that `/static/js/auth.js` contains
+   the authentication logic.
 
-2. In your `config.toml` or equivalent, enable the auth widget by
-   setting `params.auth = true`.
+4. Set `params.auth = true` in your site's configuration (`config.toml`) if you
+   plan to wrap the widget in an `if` block.
 
-3. Ensure that `firebase-config.js` and `auth.js` exist in your
-   project's `static/js` directory and contain your Firebase
-   configuration and authentication logic, respectively.
-
-4. Build and deploy your site.  The authentication widget should
-   appear at the bottom of each page if enabled in the configuration.
+After applying these steps, rebuild your site.  The existing PaperMod
+layout will remain intact, and the authentication form will appear
+where you inserted it.
