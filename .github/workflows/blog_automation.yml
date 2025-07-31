@@ -1,54 +1,45 @@
-name: Daily KBC Blog Update
+name: build
 
 on:
-  # Run daily at midnight UTC and allow manual triggering
-  schedule:
-    - cron: '0 0 * * *'
   workflow_dispatch:
+  schedule:
+    - cron: '0 7 * * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      # Check out the repo with submodules so the PaperMod theme is present
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
 
-      # Set up Python
-      - uses: actions/setup-python@v3
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
         with:
           python-version: '3.10'
 
-      # Install Python dependencies for the generator script
-      - run: pip install --no-cache-dir openai python-slugify
+      - name: Install dependencies
+        run: pip install --no-cache-dir openai python-slugify
 
-      # Generate the blog post; provide OpenAI key and optional chat summary path
-      - env:
+      - name: Run blog generator script
+        env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # Set CHAT_SUMMARY_PATH if you commit a daily summary file.
-          # For example: CHAT_SUMMARY_PATH=daily_summary.txt
+          CHAT_SUMMARY_PATH: content/summary.txt
         run: python scripts/generate_blog_post.py
 
-      # Install Hugo (extended version) via action
       - name: Install Hugo
         uses: peaceiris/actions-hugo@v2
         with:
           hugo-version: '0.146.0'
           extended: true
 
-      # Build the static site with the new post
       - name: Build site
         run: hugo --minify
 
-      # Commit and push new content and updated public/ folder
-      - name: Commit and push
+      - name: Commit and push if needed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Stage content/posts and the generated public directory
           git add content/posts public
-          # Only commit if there are changes
           if ! git diff --cached --quiet; then
             git commit -m "chore: auto-generated KBC blog update $(date +'%Y-%m-%d')"
             git push
