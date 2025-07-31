@@ -1,52 +1,35 @@
 name: Generate and Publish Blog Post
 
-# This workflow generates a new blog post using the OpenAI API and commits
-# it to the repository once per day.  To enable it, you must add an
-# `OPENAI_API_KEY` secret to your repository settings.  The workflow uses
-# the built-in GitHub token to push the new post back to the repository.
-
 on:
-  workflow_dispatch:  # Enables manual triggering
-  # Run once a day at 03:00 UTC.  Adjust the schedule as needed.
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 0 * * *'   # Run at 00:00 UTC daily
+    - cron: '0 12 * * *'  # Run at 12:00 UTC daily
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
-          pip install --no-cache-dir openai python-slugify
+          python -m pip install --upgrade pip
+          pip install openai python-dotenv
 
       - name: Generate blog post
-        # Provide required and optional environment variables to the script.
-        env:
-          # Your OpenAI API key must be stored as a secret in the repository settings.
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # Optional: specify the path to a daily chat summary text file.  If provided
-          # and the file exists, the script will include its contents in the blog
-          # generation prompt.  Otherwise, it will select a random topic.
-          CHAT_SUMMARY_PATH: ${{ env.CHAT_SUMMARY_PATH }}
-        run: |
-          python scripts/generate_blog_post.py
+        run: python scripts/generate_blog_post.py
 
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Detect if there are any changes (new file) to commit
-          if [ -n "$(git status --porcelain)" ]; then
-            git add content/posts
-            git commit -m "chore: auto-generated blog post $(date +'%Y-%m-%d')"
-            git push
-          else
-            echo "No changes to commit."
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/posts/*.md
+          git diff --cached --quiet || git commit -m "Automated blog post $(date -u +"%Y-%m-%d %H:%M:%S")" && git push

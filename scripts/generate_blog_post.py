@@ -45,12 +45,7 @@ def get_openai_client() -> "openai.Client":
 
 
 def choose_topic() -> str:
-    """Return a random blog topic relevant to the KBC project.
-
-    The list below can be expanded or rotated.  If the script is
-    executed daily, you may wish to maintain a separate topics file to
-    avoid repetition.  For simplicity we select randomly here.
-    """
+    """Deterministically select the next topic from a 15-topic list, rotating twice per month."""
     topics = [
         "Introduction to Knowledge-Based Currency (KBC)",
         "Understanding the K-Chain: Immutable Knowledge Ledger",
@@ -68,7 +63,11 @@ def choose_topic() -> str:
         "Future Innovations and Potential of KBC",
         "How KBC Reinvents Community and Collaboration"
     ]
-    return random.choice(topics)
+
+    today = datetime.date.today()
+    run_number = 0 if datetime.datetime.utcnow().hour < 12 else 1  # 0 = midnight, 1 = noon
+    index = ((today.timetuple().tm_yday - 1) * 2 + run_number) % len(topics)
+    return topics[index]
 
 
 def read_chat_summary() -> str | None:
@@ -92,10 +91,11 @@ def read_chat_summary() -> str | None:
 def generate_post(topic: str, client: "openai", summary: str | None) -> str:
     """Call OpenAI API to generate a blog post."""
     today = datetime.date.today().strftime("%B %d")
+    year = datetime.date.today().year
     if summary:
         prompt = (
             "You are an expert technical writer for the Knowledge-Based Currency (KBC) project.\n"
-            f"Write a 600-word engaging blog post for {today}, summarizing today's progress on KBC.\n"
+            f"Write a 600-word engaging blog post for {today}, {year}, based on this topic: {topic}.\n" summarizing today's progress on KBC.\n"
             f"Use these notes:\n{summary}\n\n"
             "Ensure the post is accessible to a general audience, maintains an inspirational tone, "
             "and clearly explains relevant KBC concepts such as verifiable knowledge, Proof-of-Knowledge, K-Chain, LightWeb, and Oracle AI. "
