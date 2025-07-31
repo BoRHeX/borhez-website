@@ -1,45 +1,34 @@
+This patch provides the necessary files to integrate Firebase email/password
+authentication into your Hugo-based website.  Drop the contents of the
+`auth_patch` directory into your site's root (merging with existing
+`layouts` and `static` directories) and ensure your configuration
+enables the authentication widget.
 
-Firebase Email/Password Auth Setup for Hugo (PaperMod)
------------------------------------------------------
+Files included:
 
-This package provides the files needed to add client-side email/password authentication to a Hugo site using Firebase.
+* `layouts/_default/baseof.html` – A simple base layout that renders
+  your page content and conditionally injects the user authentication
+  widget when `params.auth` is true in your config.  It also loads
+  the Firebase and auth scripts at the bottom of the page.
 
-Files:
-  /static/js/firebase-config.js   – Placeholder for your Firebase project config.  Replace the values with your project’s credentials.
-  /static/js/auth.js              – Authentication logic for register, login, logout and session handling.
-  /layouts/partials/user-auth.html – An HTML partial you can include in any page via `{{ partial "user-auth.html" . }}`.
+* `layouts/partials/user-auth.html` – The authentication widget.  It
+  contains email and password fields, buttons for registration,
+  login and logout, and status/error messages.  You can include this
+  partial in any template with `{{ partial "user-auth.html" . }}`.
 
-Setup Steps:
-1. **Create/Select a Firebase Project**
-   • Go to https://console.firebase.google.com and create a project (or use an existing one).
+Usage:
 
-2. **Enable Email/Password Auth**
-   • Navigate to *Build → Authentication → Sign-in method*.
-   • Enable the Email/Password provider.
+1. Copy the files into your Hugo project:
 
-3. **Register a Web App**
-   • In *Project settings → General → Your apps*, click “Add app” and choose the Web icon.
-   • You do not need Firebase Hosting; just register the app.
-   • Copy the config snippet shown (apiKey, authDomain, projectId, etc.).
-   • Paste these values into `static/js/firebase-config.js`.
+       cp -R auth_patch/layouts/* your-site/layouts/
+       cp -R auth_patch/static/js/* your-site/static/js/
 
-4. **Include the Scripts in your Hugo Layout**
-   • Add the following tags to your `layouts/_default/baseof.html` (just before `</body>`):
-     ```html
-     <script type="module" src="/js/firebase-config.js"></script>
-     <script type="module" src="/js/auth.js"></script>
-     ```
-   • Insert the user auth partial wherever you want the login UI (e.g., in your navbar or footer):
-     ```go
-     {{ partial "user-auth.html" . }}
-     ```
+2. In your `config.toml` or equivalent, enable the auth widget by
+   setting `params.auth = true`.
 
-5. **Enable Comments in config (Optional)**
-   • If you want to control whether the auth widget appears site-wide, you can expose a parameter in `config.toml` such as `[params] auth = true` and conditionally render the partial in your templates.
+3. Ensure that `firebase-config.js` and `auth.js` exist in your
+   project's `static/js` directory and contain your Firebase
+   configuration and authentication logic, respectively.
 
-Notes:
-- This uses Firebase JS SDK v10 (modular API) loaded via ES modules from Google’s CDN.  Make sure your site does not block these scripts.
-- All authentication happens client-side; the Hugo site remains fully static.
-- No third-party providers (Google, GitHub) are configured here; only email/password.
-
-Once set up, users can register, log in, and log out using the auth widget.  The current user’s email is displayed when signed in.
+4. Build and deploy your site.  The authentication widget should
+   appear at the bottom of each page if enabled in the configuration.
