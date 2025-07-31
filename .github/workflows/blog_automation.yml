@@ -6,6 +6,7 @@ name: Generate and Publish Blog Post
 # the built-in GitHub token to push the new post back to the repository.
 
 on:
+  workflow_dispatch:  # Enables manual triggering
   # Run once a day at 03:00 UTC.  Adjust the schedule as needed.
   schedule:
     - cron: '0 3 * * *'
