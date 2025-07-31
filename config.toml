@@ -16,6 +16,7 @@ theme = "PaperMod"
 author = "Master BoRHeZ"
 description = "The official Knowledge-Based Currency (KBC) repository"
 defaultTheme = "dark"
+comments = true
 
   # Label settings control the logo in the top-left of the header.
   [params.label]
