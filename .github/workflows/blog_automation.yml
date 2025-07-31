@@ -1,4 +1,4 @@
-name: build
+name: Blog post automation
 
 on:
   workflow_dispatch:
