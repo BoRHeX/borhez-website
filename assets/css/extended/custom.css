@@ -83,3 +83,25 @@
   font-size: 0.8rem;
   z-index: 1000;
 }
+
+/* General styling for login form */
+#user-auth-widget {
+  margin-top: 1rem;
+}
+#user-auth-widget input {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background-color: var(--entry);
+  color: var(--fg);
+}
+/* Light mode overrides */
+html[data-theme="light"] #user-auth-widget input {
+  background-color: #f5f5f5;
+  color: #333;
+}
+/* Dark mode overrides */
+html[data-theme="dark"] #user-auth-widget input {
+  background-color: #1a1a1a;
+  color: #eee;
+}
