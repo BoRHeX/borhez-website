@@ -2,35 +2,23 @@
 """
 Generate a daily blog post for the KBC site.
 
-- Uses CHAT_SUMMARY_PATH if available to summarize a recent KBC interaction.
-- Otherwise generates a post from a rotating KBC topic list.
-- Outputs a Markdown file in content/posts with proper Hugo front matter.
+If CHAT_SUMMARY_PATH points to a text file, its contents are used as context.
+Otherwise, the script chooses a topic from a rotating list. It writes a Markdown file
+with Hugo front matter into content/posts/.
 """
-
 import os
 import random
 import datetime
 from pathlib import Path
 from slugify import slugify
-import openai
+from openai import OpenAI  # OpenAI v1 client
 
-
-# ---- CONFIG ----
-MODEL = "gpt-4"  # Can be 'gpt-4', 'gpt-4o', or 'gpt-3.5-turbo'
-TOKENS = 1200
-TEMPERATURE = 0.7
-
-
-# ---- SETUP ----
-def get_openai_client() -> "openai":
+def get_openai_client() -> OpenAI:
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
-        raise SystemExit("❌ OPENAI_API_KEY not set in environment.")
-    openai.api_key = api_key
-    return openai
+        raise SystemExit("OPENAI_API_KEY environment variable not set.")
+    return OpenAI(api_key=api_key)
 
-
-# ---- CONTEXT ----
 def read_chat_summary() -> str | None:
     path = os.environ.get("CHAT_SUMMARY_PATH")
     if not path:
@@ -38,92 +26,82 @@ def read_chat_summary() -> str | None:
     try:
         with open(path, "r", encoding="utf-8") as f:
             return f.read().strip()
-    except Exception as e:
-        print(f"⚠️ Failed to read chat summary from {path}: {e}")
+    except Exception:
         return None
 
-
-def choose_topic(index: int = None) -> str:
+def get_topic_by_day() -> str:
     topics = [
-        "the philosophy behind Knowledge‑Based Currency",
-        "how the K‑Chain ensures trust and immutability",
+        "the philosophy behind Knowledge-Based Currency",
+        "how the K-Chain ensures trust and immutability",
         "the vision of LightWeb as a decentralized knowledge internet",
-        "the role of Oracle AI in validating and synthesizing knowledge",
-        "building the Minimum Viable System for KBC",
+        "the role of Oracle AI in validating and synthesizing knowledge",
+        "the mathematics and mechanics of KBC",
         "how knowledge becomes a universal asset",
         "why KBC matters for science and innovation",
         "the future of decentralized learning and value",
-        "the link between KBC and education reform",
-        "the difference between information and knowledge",
-        "the ethics of valuing knowledge digitally",
-        "resisting manipulation through verifiable truth",
-        "KBC as a unifying system for human potential",
-        "how to participate in the KBC ecosystem",
-        "the mathematics of KBC and the 1 = ∑vi principle",
+        "how KBC combats misinformation and preserves truth",
+        "incentives for collaboration and contribution in KBC",
+        "how the KBC ledger ensures transparency and fairness",
+        "KBC and education: building the next generation of thinkers",
+        "applying KBC principles in real-world institutions",
+        "KBC's approach to intellectual property and authorship",
+        "how KBC aligns with the natural growth of knowledge"
     ]
-    return topics[index % len(topics)] if index is not None else random.choice(topics)
+    day_index = datetime.date.today().day % len(topics)
+    return topics[day_index]
 
-
-# ---- GENERATION ----
-def generate_post(topic: str, client: "openai", summary: str | None) -> str:
-    today = datetime.date.today().strftime("%B %d, %Y")
+def generate_post(topic: str, client: OpenAI, summary: str | None) -> str:
     if summary:
         prompt = (
-            f"You are the official technical writer for the Knowledge-Based Currency (KBC) project.\n"
-            f"Write a 600-word blog post for {today} summarizing today's development and insights in the project.\n"
-            f"Use the following as your context and notes:\n{summary}\n\n"
-            f"The post must be inspirational, intelligent, and accessible to curious readers. "
-            f"Do not include YAML front matter, code fences, or markdown headers. Just write a plain text article with paragraphs and structure."
+            "You are an expert technical writer for the Knowledge-Based Currency (KBC) project.\n"
+            "Write a 600-word blog post summarizing today's progress on the KBC project.\n"
+            "Use the following notes as context:\n"
+            f"{summary}\n\n"
+            "Ensure the post is accessible to a general audience, maintains a positive and inspirational tone, "
+            "and explains relevant KBC concepts such as verifiable knowledge, Proof-of-Knowledge, K-Chain, LightWeb and Oracle AI. "
+            "Use headings and paragraphs. Do not include YAML front matter or code fences."
         )
     else:
         prompt = (
-            f"You are the official writer for the Knowledge-Based Currency (KBC) project.\n"
-            f"Write a 600-word blog post for {today} on this topic: '{topic}'.\n"
-            f"Include context on the concepts of Proof-of-Knowledge, K‑Chain, LightWeb, and Oracle AI, where appropriate.\n"
-            f"The tone should be educational and forward-thinking. Do not include YAML front matter, code fences, or markdown headers."
+            "You are an expert technical writer for the Knowledge-Based Currency (KBC) project.\n"
+            f"Write a 600-word blog post about {topic}.\n"
+            "The post should be accessible to a general audience, maintain a positive and inspirational tone, "
+            "and explain the core ideas of KBC: verifiable knowledge, Proof-of-Knowledge, K-Chain, LightWeb and Oracle AI. "
+            "Use headings and paragraphs. Do not include YAML front matter or code fences."
         )
-
-    response = client.ChatCompletion.create(
-        model=MODEL,
+    response = client.chat.completions.create(
+        model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
-        max_tokens=TOKENS,
-        temperature=TEMPERATURE,
+        max_tokens=1000,
+        temperature=0.7,
     )
     return response.choices[0].message.content.strip()
 
-
-# ---- WRITING ----
 def write_post(title: str, body: str) -> Path:
     date = datetime.date.today()
-    slug = slugify(title)[:60]
-    filename = Path("content/posts") / f"{date.isoformat()}-{slug}.md"
-    filename.parent.mkdir(parents=True, exist_ok=True)
-
+    posts_dir = Path("content/posts")
+    posts_dir.mkdir(parents=True, exist_ok=True)
+    slug = slugify(title)
+    filename = posts_dir / f"{date.isoformat()}-{slug}.md"
     front_matter = (
         f"---\n"
         f"title: \"{title.capitalize()}\"\n"
         f"date: {date.isoformat()}\n"
         f"draft: false\n"
-        f"tags: [\"KBC\", \"daily-update\"]\n"
+        f"tags: [\"KBC\", \"daily-updates\"]\n"
         f"---\n\n"
     )
-
     with open(filename, "w", encoding="utf-8") as f:
         f.write(front_matter + body + "\n")
-
     return filename
 
-
-# ---- MAIN ----
-def main():
+def main() -> None:
     client = get_openai_client()
     summary = read_chat_summary()
-    index = datetime.date.today().timetuple().tm_yday % 15
-    topic = "today's KBC update" if summary else choose_topic(index)
-    post = generate_post(topic, client, summary)
-    filepath = write_post(topic, post)
-    print(f"✅ Blog post generated: {filepath}")
-
+    topic = "today's KBC update" if summary else get_topic_by_day()
+    body = generate_post(topic, client, summary)
+    path = write_post(topic, body)
+    print(f"Generated blog post: {path}")
 
 if __name__ == "__main__":
     main()
