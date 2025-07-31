@@ -93,23 +93,21 @@ def generate_post(topic: str, client: "openai", summary: str | None) -> str:
     today = datetime.date.today().strftime("%B %d")
     year = datetime.date.today().year
     if summary:
-        prompt = (
-            "You are an expert technical writer for the Knowledge-Based Currency (KBC) project.\n"
-            f"Write a 600-word engaging blog post for {today}, {year}, based on this topic: {topic}.\n" summarizing today's progress on KBC.\n"
-            f"Use these notes:\n{summary}\n\n"
-            "Ensure the post is accessible to a general audience, maintains an inspirational tone, "
-            "and clearly explains relevant KBC concepts such as verifiable knowledge, Proof-of-Knowledge, K-Chain, LightWeb, and Oracle AI. "
-            "Use headings and paragraphs. Do not include YAML front matter or code fences."
-        )
+    prompt = (
+        f"Write a 600-word engaging blog post for {today}, {year}, based on this topic: {topic}.\n"
+        f"Summarize today's progress on KBC.\n"
+        f"Include key takeaways from this summary: {summary}\n"
+        f"Make it informative, reflective, and relevant to present global issues.\n"
+        f"Do not include any YAML front matter or markdown headers (like '# Title'). Just start directly with the blog content.\n"
+    )
     else:
-        prompt = (
-            "You are an expert technical writer for the Knowledge-Based Currency (KBC) project.\n"
-            f"Write a 600-word engaging blog post for {today}, making connections to important historical events on this date.\n"
-            f"The specific topic is: {topic}.\n"
-            "Ensure the post is accessible to a general audience, maintains an inspirational tone, "
-            "and clearly explains relevant KBC concepts such as verifiable knowledge, Proof-of-Knowledge, K-Chain, LightWeb, and Oracle AI. "
-            "Use headings and paragraphs. Do not include YAML front matter or code fences."
-        )
+    prompt = (
+        f"Write a 600-word engaging blog post for {today}, {year}, on the topic: {topic}.\n"
+        f"Include historical context, current relevance, and how it connects to Knowledge-Based Currency (KBC).\n"
+        f"Ensure clarity for general readers and include insightful commentary.\n"
+        f"Do not include any YAML front matter or markdown headers (like '# Title'). Just start directly with the blog content.\n"
+    )
+
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
