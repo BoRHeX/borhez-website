@@ -90,10 +90,7 @@ def read_chat_summary() -> str | None:
 
 
 def generate_post(topic: str, client: "openai", summary: str | None) -> str:
-    """Call OpenAI ChatCompletion to generate a blog post on the given topic.
-
-    If a chat summary is provided, incorporate it into the post; otherwise, write a standalone piece.
-    """
+    """Call OpenAI API to generate a blog post."""
     today = datetime.date.today().strftime("%B %d")
     if summary:
         prompt = (
@@ -114,7 +111,7 @@ def generate_post(topic: str, client: "openai", summary: str | None) -> str:
             "Use headings and paragraphs. Do not include YAML front matter or code fences."
         )
 
-    response = client.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=1000,
@@ -122,6 +119,7 @@ def generate_post(topic: str, client: "openai", summary: str | None) -> str:
     )
 
     return response.choices[0].message.content.strip()
+
 
 
 
