@@ -1,0 +1,26 @@
+{{/*
+  Custom base layout that wraps the PaperMod theme's header, footer,
+  and main content while injecting the user authentication widget
+  and Firebase scripts.  This preserves the theme’s dark/light mode
+  functionality by still calling the theme’s script partial.
+*/}}
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang }}">
+  {{ partial "head.html" . }}
+  <body class="{{ .Site.Params.bodyClass }}">
+    {{ partial "header.html" . }}
+    <main>
+      {{ block "main" . }}{{ end }}
+    </main>
+    {{ partial "footer.html" . }}
+
+    {{/* Insert the authentication widget and Firebase scripts */}}
+    {{ if .Site.Params.auth }}
+      {{ partial "user-auth.html" . }}
+      <script type="module" src="/js/firebase-config.js"></script>
+      <script type="module" src="/js/auth.js"></script>
+    {{ end }}
+
+    {{ partial "scripts.html" . }}
+  </body>
+</html>

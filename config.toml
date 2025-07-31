@@ -18,6 +18,7 @@ description = "The official Knowledge-Based Currency (KBC) repository"
 defaultTheme = "dark"
 comments = true
 auth = true
+customCSS = ["css/extended/auth.css"]
 
   # Label settings control the logo in the top-left of the header.
   [params.label]
