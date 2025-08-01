@@ -1,4 +1,9 @@
-
+{{/*
+  Custom base layout that preserves PaperMod structure while injecting
+  the user auth widget and Firebase scripts.  This version omits
+  the call to `scripts.html` to avoid missing partial errors.
+*/}}
+<!DOCTYPE html>
 <html lang="{{ .Site.Language.Lang }}">
   {{ partial "head.html" . }}
   <body class="{{ .Site.Params.bodyClass }}">
@@ -8,13 +13,10 @@
     </main>
     {{ partial "footer.html" . }}
 
-    {{/* Insert the authentication widget and Firebase scripts */}}
     {{ if .Site.Params.auth }}
       {{ partial "user-auth.html" . }}
       <script type="module" src="/js/firebase-config.js"></script>
       <script type="module" src="/js/auth.js"></script>
     {{ end }}
-
-    {{ partial "scripts.html" . }}
   </body>
 </html>
