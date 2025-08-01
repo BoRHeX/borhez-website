@@ -1,9 +1,14 @@
-<!-- layouts/partials/comments.html -->
-<script
-  src="https://utteranc.es/client.js"
-  repo="BoRHeX/borhez-website"
-  issue-term="pathname"
-  theme="github-light"
-  crossorigin="anonymous"
-  async>
-</script>
+{{/*
+  Utterances commenting widget.  This partial inserts a comment
+  section powered by GitHub issues.  It should be included only
+  on blog posts (see usage in single.html).
+*/}}
+<div id="comments" style="margin-top:2rem;">
+  <script src="https://utteranc.es/client.js"
+    repo="BoRHeX/borhez-website"
+    issue-term="pathname"
+    theme="github-dark"
+    crossorigin="anonymous"
+    async>
+  </script>
+</div>

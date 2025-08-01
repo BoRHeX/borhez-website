@@ -1,48 +1,45 @@
-name: Blog post automation
+name: Generate and Publish KBC Posts
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 7 * * *'
+    # Twice daily: midnight and noon UTC
+    - cron: '0 0 * * *'
+    - cron: '0 12 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
+      - uses: actions/setup-python@v3
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
-        run: pip install --no-cache-dir openai python-slugify
+      - run: pip install --no-cache-dir openai python-slugify
 
-      - name: Run blog generator script
-        env:
+      - env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          CHAT_SUMMARY_PATH: content/summary.txt
         run: python scripts/generate_blog_post.py
 
-      - name: Install Hugo
-        uses: peaceiris/actions-hugo@v2
+      # Install Hugo extended
+      - uses: peaceiris/actions-hugo@v2
         with:
-          hugo-version: '0.146.0'
+          hugo-version: '0.117.0'
           extended: true
 
-      - name: Build site
-        run: hugo --minify
+      - run: hugo --minify
 
-      - name: Commit and push if needed
+      - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add content/posts public
           if ! git diff --cached --quiet; then
-            git commit -m "chore: auto-generated KBC blog update $(date +'%Y-%m-%d')"
+            git commit -m "chore: auto-generated blog post $(date +'%Y-%m-%d %H:%M')"
             git push
           else
-            echo "No changes to commit."
-          fi
+            echo "No new posts to commit."

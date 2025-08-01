@@ -1,10 +1,10 @@
 /*
-  Custom styling for the KBC site
-  - Constrains the main content width and centers it.
-  - Styles the authentication widget for both light and dark themes.
+  Custom CSS for KBC site
+  - Constrained layout
+  - Authentication widget styling
+  - Under-construction banner
 */
 
-/* Constrain the main content area */
 #main {
   max-width: 800px;
   margin-left: auto;
@@ -12,7 +12,6 @@
   padding: 1rem;
 }
 
-/* Auth widget styling */
 #user-auth-widget input {
   padding: 0.5rem;
   border-radius: 4px;
@@ -20,13 +19,24 @@
   background-color: var(--entry);
   color: var(--fg);
 }
-
 html[data-theme="light"] #user-auth-widget input {
   background-color: #f5f5f5;
   color: #333;
 }
-
 html[data-theme="dark"] #user-auth-widget input {
   background-color: #1a1a1a;
   color: #eee;
+}
+
+/* Under-construction banner */
+#site-alert {
+  position: fixed;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  background: var(--tertiary);
+  color: var(--fg);
+  border-radius: 4px;
+  z-index: 9999;
+  font-size: 0.85rem;
 }
