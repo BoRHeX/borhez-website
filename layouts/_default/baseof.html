@@ -1,18 +1,18 @@
-<!DOCTYPE html>
-<html lang="{{ .Site.Language.Lang }}">
-  {{ partial "head.html" . }}
-  <body class="{{ .Site.Params.bodyClass }}">
-    {{ partial "site-alert.html" . }}
-    {{ partial "header.html" . }}
-    <main id="main">
-      {{ block "main" . }}{{ end }}
-    </main>
-    {{ partial "footer.html" . }}
-    {{ if .Site.Params.auth }}
-      {{ partial "user-auth.html" . }}
-      <script type="module" src="/js/firebase-config.js"></script>
-      <script type="module" src="/js/auth.js"></script>
-    {{ end }}
-    <script src="/js/theme-persist.js"></script>
-  </body>
-</html>
+{{ partial "head.html" . }}
+
+  {{ partial "site-alert.html" . }}
+  {{ partial "header.html" . }}
+
+    {{ block "main" . }}{{ end }}
+
+  {{ partial "footer.html" . }}
+
+  <!-- Persist theme choice across page loads -->
+  <script src="/static/js/theme-toggle.js"></script>
+
+  <!-- Firebase authentication widget and scripts -->
+  {{ if .Site.Params.auth }}
+    {{ partial "user-auth.html" . }}
+    <script type="module" src="/static/js/firebase-config.js"></script>
+    <script type="module" src="/static/js/auth.js"></script>
+  {{ end }}
