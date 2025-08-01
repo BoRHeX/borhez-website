@@ -1,12 +1,9 @@
-{{/*
-  Custom single page layout that displays content and, for blog posts,
-  includes the Utterances comments widget.
-*/}}
 {{ define "main" }}
-  <article class="single">
+  <main>
     {{ .Content }}
-  </article>
-  {{ if eq .Section "posts" }}
-    {{ partial "comments.html" . }}
-  {{ end }}
+    {{/* Only show comments on blog posts */}}
+    {{ if and (.Site.Params.comments) (eq .Section "posts") }}
+      {{ partial "comments.html" . }}
+    {{ end }}
+  </main>
 {{ end }}
