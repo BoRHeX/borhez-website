@@ -1,5 +1,10 @@
 name: Generate and Publish KBC Posts
 
+# Grant the workflow permission to write back to the repository. Without
+# this, git push will fail with a permission error.
+permissions:
+  contents: write
+
 on:
   schedule:
     # Twice daily: midnight and noon UTC
@@ -11,28 +16,38 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Check out repository with submodules enabled (pulls PaperMod theme)
       - uses: actions/checkout@v3
         with:
           submodules: true
 
+      # Set up Python environment
       - uses: actions/setup-python@v3
         with:
           python-version: '3.10'
 
+      # Install dependencies for the blog generator script
       - run: pip install --no-cache-dir openai python-slugify
 
-      - env:
+      # Generate the blog post using OpenAI. Requires OPENAI_API_KEY to be
+      # configured as a repository secret.
+      - name: Generate blog post
+        env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python scripts/generate_blog_post.py
 
-      # Install Hugo extended
-      - uses: peaceiris/actions-hugo@v2
+      # Install Hugo extended to build the site
+      - name: Install Hugo extended
+        uses: peaceiris/actions-hugo@v2
         with:
           hugo-version: '0.146.0'
           extended: true
 
-      - run: hugo --minify
+      # Build the static site into the public/ directory
+      - name: Build site
+        run: hugo --minify
 
+      # Commit any new posts and the regenerated site to the repository
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
