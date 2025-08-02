@@ -7,11 +7,11 @@
  * written back to localStorage so it persists across page reloads.
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // Restore theme from storage, if previously set
+  // Restore theme from storage or apply default theme if none exists
   const stored = localStorage.getItem('theme');
-  if (stored) {
-    document.documentElement.setAttribute('data-theme', stored);
-  }
+  const defaultTheme = 'dark';
+  const currentTheme = stored || document.documentElement.getAttribute('data-theme') || defaultTheme;
+  document.documentElement.setAttribute('data-theme', currentTheme);
   // Attach toggle handler
   const toggle = document.getElementById('theme-toggle');
   if (toggle) {
