@@ -1,18 +1,39 @@
-{{ partial "head.html" . }}
+{{- if lt hugo.Version "0.146.0" }}
+    {{- errorf "=> hugo v0.146.0 or greater is required for hugo-PaperMod to build " }}
+{{- end -}}
 
-  {{ partial "site-alert.html" . }}
-  {{ partial "header.html" . }}
+<!DOCTYPE html>
+<html lang="{{ site.Language }}" dir="{{ .Language.LanguageDirection | default "auto" }}">
+<head>
+    {{- partial "head.html" . }}
+</head>
 
-    {{ block "main" . }}{{ end }}
+<body class="
+    {{- if (or (ne .Kind `page`) (eq .Layout `archives`) (eq .Layout `search`)) -}}
+    {{- print "list" -}}
+    {{- end -}}
+    {{- if eq site.Params.defaultTheme `dark` -}}
+    {{- print " dark" -}}
+    {{- end -}}
+" id="top">
 
-  {{ partial "footer.html" . }}
+    {{- partial "site-alert.html" . -}}
+    {{- partialCached "header.html" . .Page -}}
 
-  <!-- Persist theme choice across page loads -->
-  <script src="/static/js/theme-toggle.js"></script>
+    <main class="main">
+        {{- block "main" . }}{{ end }}
+    </main>
 
-  <!-- Firebase authentication widget and scripts -->
-  {{ if .Site.Params.auth }}
-    {{ partial "user-auth.html" . }}
-    <script type="module" src="/static/js/firebase-config.js"></script>
-    <script type="module" src="/static/js/auth.js"></script>
-  {{ end }}
+    {{- partialCached "footer.html" . .Layout .Kind (.Param "hideFooter") (.Param "ShowCodeCopyButtons") -}}
+
+    {{- if .Site.Params.auth -}}
+        {{- partial "user-auth.html" . -}}
+        <script type="module" src="/static/js/firebase-config.js"></script>
+        <script type="module" src="/static/js/auth.js"></script>
+    {{- end -}}
+
+    <!-- Persist theme choice across page loads -->
+    <script src="/static/js/theme-toggle.js"></script>
+
+</body>
+</html>
