@@ -1,10 +1,15 @@
-
 // auth.js
 // Handles user authentication using Firebase Email/Password.
 // Requires firebase-config.js to be loaded before this script.
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
 import { firebaseConfig } from './firebase-config.js';
 
 // Initialize Firebase app and auth service
@@ -20,7 +25,7 @@ const logoutButton = document.getElementById('auth-logout');
 const userInfo = document.getElementById('auth-user-info');
 const errorMsg = document.getElementById('auth-error');
 
-// Clear any existing errors
+// Display an error message to the user
 function showError(message) {
   if (errorMsg) {
     errorMsg.textContent = message;
@@ -28,6 +33,7 @@ function showError(message) {
   }
 }
 
+// Clear any existing error message
 function clearError() {
   if (errorMsg) {
     errorMsg.textContent = '';
@@ -69,7 +75,7 @@ async function logoutUser() {
   }
 }
 
-// Attach button handlers once DOM is loaded
+// Attach event listeners to buttons
 function initAuthUI() {
   if (registerButton) registerButton.addEventListener('click', registerUser);
   if (loginButton) loginButton.addEventListener('click', loginUser);
@@ -98,9 +104,8 @@ onAuthStateChanged(auth, (user) => {
   updateUI(user);
 });
 
-// Initialize UI on DOMContentLoaded
+// Initialize UI and update status on page load
 window.addEventListener('DOMContentLoaded', () => {
   initAuthUI();
-  // Show initial state
   updateUI(auth.currentUser);
 });
