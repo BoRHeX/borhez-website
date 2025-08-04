@@ -1,18 +1,26 @@
-/* Theme colour overrides for dark and light modes */
-:root[data-theme="dark"] {
-  --bg: #000;
-  --entry: #141414;
-  --fg: #f5f5f5;
-  --primary: #d4af37;   /* gold */
-  --tertiary: #8b0000;  /* deep red */
-}
-
-:root[data-theme="light"] {
-  --bg: #ffffff;
-  --entry: #f9f9f9;
-  --fg: #111;
-  --primary: #d4af37;
-  --tertiary: #8b0000;
+/* Theme colour overrides for dark and light modes.
+ *
+ * PaperMod toggles dark mode by adding a `dark` class to the <body> element.
+ * These rules set CSS variables based on that class so both the built‑in
+ * and any custom theme toggler will work.  When the body has the
+ * `dark` class, the dark palette applies; when it does not, the light
+ * palette applies. */
+/* Both dark and light modes share the same KBC colour palette: matte black,
+ * shiny gold and blood red.  Define these variables on the body for
+ * consistency.  Light mode will still invert text/background if needed,
+ * but the underlying colours remain the same.
+ */
+body.dark,
+body:not(.dark) {
+  /* matte black background and entries */
+  --bg: #121212;
+  --entry: #121212;
+  /* soft white foreground for readability */
+  --fg: #f0f0f0;
+  /* gold primary accent */
+  --primary: #D4AF37;
+  /* blood red tertiary accent */
+  --tertiary: #B22222;
 }
 
 /* Constrain the main content area */
@@ -28,14 +36,6 @@
   padding: 0.5rem;
   border-radius: 4px;
   border: 1px solid var(--border, #444);
-  background-color: var(--entry);
-  color: var(--fg);
-}
-html[data-theme="light"] #user-auth-widget input {
-  background-color: var(--entry);
-  color: var(--fg);
-}
-html[data-theme="dark"] #user-auth-widget input {
   background-color: var(--entry);
   color: var(--fg);
 }
@@ -55,9 +55,41 @@ html[data-theme="dark"] #user-auth-widget input {
 
 /* Add logo as a subtle page background */
 body {
-  background-image: url('/images/logo-gold.png');
+  /* Use the transparent version of the logo as a subtle page background */
+  /* Use the transparent version of the logo as a subtle page background.
+   * Scale it to fill the viewport while preserving aspect ratio.  The
+   * transparent PNG allows the black, gold and red theme to show through. */
+  background-image: url('/images/logo-gold-transparent.png');
   background-repeat: no-repeat;
-  background-position: center top;
-  background-size: 200px auto;
+  background-position: center center;
+  background-size: cover;    /* Fill the page while maintaining aspect ratio */
   background-attachment: fixed;
+
+  /* Set default page colours using the custom variables defined above. */
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+/* Navigation bar and header styling using matte black */
+nav, header {
+  background-color: #121212;
+}
+
+/* Navigation link colours: gold by default, blood red on hover */
+nav a {
+  color: #D4AF37;
+  transition: color 0.3s ease;
+}
+nav a:hover,
+nav a.active {
+  color: #B22222;
+}
+
+
+/* Highlight classes (buttons, links) */
+.highlight, .btn, .link {
+  color: #D4AF37;
+}
+.highlight:hover, .btn:hover, .link:hover {
+  color: #B22222;
 }

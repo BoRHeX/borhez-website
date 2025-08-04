@@ -13,17 +13,18 @@ theme = "PaperMod"
       unsafe = true
 
 [params]
-author = "Master BoRHeZ"
-description = "The official Knowledge-Based Currency (KBC) repository"
-defaultTheme = "dark"
-comments = true
-auth = true
-customCSS = ["css/extended/auth.css"]
+  author = "Master BoRHeZ"
+  description = "The official Knowledge-Based Currency (KBC) repository"
+  defaultTheme = "dark"
+  comments = true
+  auth = true
+  # Use our single custom CSS file. auth.css has been merged into custom.css
+  customCSS = ["css/extended/custom.css"]
 
   # Label settings control the logo in the top-left of the header.
   [params.label]
-    # Path to the logo file in the static directory (gold on black).
-    icon = "images/logo-gold.png"
+    # Path to the logo file in the static directory (transparent version).
+    icon = "images/logo-gold-transparent.png"
     # Height of the logo in pixels.
     iconHeight = 40
     # Set text to empty to suppress duplicate title next to the logo; the site title will still appear as tooltip.
@@ -31,10 +32,10 @@ customCSS = ["css/extended/auth.css"]
 
   # Provide favicons in different sizes.  These files live under static/images/.
   [params.assets]
-    favicon = "images/logo-gold.png"
+    favicon = "images/logo-gold-transparent.png"
     favicon16x16 = "images/favicon-16x16.png"
     favicon32x32 = "images/favicon-32x32.png"
-    apple_touch_icon = "images/logo-gold.png"
+    apple_touch_icon = "images/logo-gold-transparent.png"
 
   # Social links displayed via the social_icons partial.
   [[params.socialIcons]]
