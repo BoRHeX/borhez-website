@@ -5,21 +5,29 @@
  * and any custom theme toggler will work.  When the body has the
  * `dark` class, the dark palette applies; when it does not, the light
  * palette applies. */
-/* Both dark and light modes share the same KBC colour palette: matte black,
- * shiny gold and blood red.  Define these variables on the body for
- * consistency.  Light mode will still invert text/background if needed,
- * but the underlying colours remain the same.
- */
-body.dark,
-body:not(.dark) {
-  /* matte black background and entries */
+/* Define separate palettes for dark and light modes.  Both use the
+ * signature KBC colours—matte black (#121212), shiny gold (#D4AF37)
+ * and blood red (#B22222)—but light mode reverses the foreground and
+ * background to maintain legibility. */
+body.dark {
+  /* Dark background and entries */
   --bg: #121212;
   --entry: #121212;
-  /* soft white foreground for readability */
+  /* Light text */
   --fg: #f0f0f0;
-  /* gold primary accent */
+  /* Accents */
   --primary: #D4AF37;
-  /* blood red tertiary accent */
+  --tertiary: #B22222;
+}
+
+body:not(.dark) {
+  /* Light background */
+  --bg: #f7f7f7;
+  --entry: #ffffff;
+  /* Dark text */
+  --fg: #121212;
+  /* Accents remain the same */
+  --primary: #D4AF37;
   --tertiary: #B22222;
 }
 
@@ -56,10 +64,16 @@ body:not(.dark) {
 /* Add logo as a subtle page background */
 body {
   /* Use the transparent version of the logo as a subtle page background */
-  /* Use the transparent version of the logo as a subtle page background.
-   * Scale it to fill the viewport while preserving aspect ratio.  The
-   * transparent PNG allows the black, gold and red theme to show through. */
-  background-image: url('/images/logo-gold-transparent.png');
+  /* Layer the transparent logo beneath a semi-opaque overlay so
+   * the background is dark enough for text while still showing
+   * the emblem.  The linear gradient adds a matte tint for dark
+   * pages and a light wash for light pages. */
+  background-image:
+    /* The linear gradient darkens the page to make the logo subtle.  A 90%
+     * opacity keeps the logo barely visible so it does not compete with
+     * text content. */
+    linear-gradient(rgba(18, 18, 18, 0.9), rgba(18, 18, 18, 0.9)),
+    url('/images/logo-gold-transparent.png');
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;    /* Fill the page while maintaining aspect ratio */
