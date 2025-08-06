@@ -57,4 +57,5 @@ jobs:
             git commit -m "chore: auto-generated blog post $(date +'%Y-%m-%d %H:%M')"
             git push
           else
-            echo "No new posts to commit." 
+            echo "No new posts to commit."
+          fi
