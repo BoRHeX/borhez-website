@@ -2,10 +2,10 @@ name: Build and Deploy (Hugo → GitHub Pages)
 
 on:
   push:
-    branches: [ main ]
-  schedule:
-    - cron: "0 0 * * *"    # midnight UTC
-    - cron: "0 12 * * *"   # noon UTC
+    branches: [ main ]          # deploy on any content change
+  schedule:                      # twice per day
+    - cron: "0 0 * * *"
+    - cron: "0 12 * * *"
   workflow_dispatch:
 
 permissions:
@@ -19,24 +19,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # If your blog script is in the repo, run it before building Hugo
+      # 1) Generate today's post (if your generator is in the repo)
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install blog generator deps
+      - name: Install generator deps
         run: |
           python -m pip install --upgrade pip
-          pip install python-slugify openai
+          pip install openai python-slugify
 
-      - name: Generate today's post
+      - name: Generate blog post
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          CHAT_SUMMARY_PATH: ""   # or set to a file path if you use summaries
+          CHAT_SUMMARY_PATH: ""     # set if you actually use it
         run: |
           python generate_blog_post.py
 
+      # 2) Build the site (artifact, not commits)
       - name: Install Hugo
         uses: peaceiris/actions-hugo@v2
         with:
@@ -45,6 +46,7 @@ jobs:
 
       - name: Build Hugo site
         run: |
+          # buildFuture avoids “scheduled post” skips; harmless otherwise
           hugo --minify --buildFuture
 
       - name: Upload Pages artifact
