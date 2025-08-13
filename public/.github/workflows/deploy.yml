@@ -1,0 +1,64 @@
+name: Build and Deploy (Hugo → GitHub Pages)
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: "0 0 * * *"    # midnight UTC
+    - cron: "0 12 * * *"   # noon UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # If your blog script is in the repo, run it before building Hugo
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install blog generator deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-slugify openai
+
+      - name: Generate today's post
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CHAT_SUMMARY_PATH: ""   # or set to a file path if you use summaries
+        run: |
+          python generate_blog_post.py
+
+      - name: Install Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: "0.126.1"
+          extended: true
+
+      - name: Build Hugo site
+        run: |
+          hugo --minify --buildFuture
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
