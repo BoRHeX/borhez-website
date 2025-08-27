@@ -46,7 +46,6 @@ jobs:
 
       - name: Build Hugo site
         run: |
-          # buildFuture avoids “scheduled post” skips; harmless otherwise
           hugo --minify --buildFuture
 
       - name: Upload Pages artifact
