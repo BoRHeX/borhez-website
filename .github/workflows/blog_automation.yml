@@ -1,61 +1,58 @@
-name: Generate and Publish KBC Posts
-
-# Grant the workflow permission to write back to the repository. Without
-# this, git push will fail with a permission error.
-permissions:
-  contents: write
+name: Generate & Deploy Blog
 
 on:
   schedule:
-    # Twice daily: midnight and noon UTC
-    - cron: '0 0 * * *'
-    - cron: '0 12 * * *'
+    - cron: '5 6,18 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
-  build:
+  generate-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      # Check out repository with submodules enabled (pulls PaperMod theme)
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          submodules: true
-
-      # Set up Python environment
-      - uses: actions/setup-python@v3
+          fetch-depth: 0
+          submodules: recursive
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-
-      # Install dependencies for the blog generator script
-      - run: pip install --no-cache-dir openai python-slugify
-
-      # Generate the blog post using OpenAI. Requires OPENAI_API_KEY to be
-      # configured as a repository secret.
+          python-version: '3.11'
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-frontmatter pyyaml python-slugify
       - name: Generate blog post
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python scripts/generate_blog_post.py
-
-      # Install Hugo extended to build the site
-      - name: Install Hugo extended
-        uses: peaceiris/actions-hugo@v2
-        with:
-          hugo-version: '0.146.0'
-          extended: true
-
-      # Build the static site into the public/ directory
-      - name: Build site
-        run: hugo --minify
-
-      # Commit any new posts and the regenerated site to the repository
-      - name: Commit and push
+        run: |
+          python scripts/generate_blog_post.py --rotate --cooldown-days 21
+      - name: Commit changes (if any)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add content/posts public
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: auto-generated blog post $(date +'%Y-%m-%d %H:%M')"
-            git push
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
           else
-            echo "No new posts to commit."
-          fi
+            git commit -m "chore(blog): automated post + rotation state [skip ci]"
+            git push
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.135.0'
+          extended: true
+      - name: Build site
+        run: |
+          hugo --minify
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages

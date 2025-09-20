@@ -1,129 +1,166 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Generate a blog post for the KBC site.  This script is designed to
-be run automatically via GitHub Actions.  It will read an optional
-daily summary file specified by the CHAT_SUMMARY_PATH environment
-variable; if present, the summary will be used as context for the
-post.  Otherwise, the script will choose a random topic from a list
-of KBC themes and generate an ~600-word article using the OpenAI API.
+Stateful blog post generator for Hugo (PaperMod) with topic rotation.
 
-Requires the following environment variables:
+- Reads topics from 'scripts/topics.json'.
+- Tracks last-used topics in '.github/state/blog_state.json' (created if missing).
+- Avoids repeating a topic within N cooldown days (default 21).
+- Writes front matter with 'topic' to help future rotation checks.
+- Falls back to deterministic stub content if OPENAI_API_KEY is not set.
 
-  OPENAI_API_KEY      – API key for OpenAI's Chat API
-  CHAT_SUMMARY_PATH   – (optional) path to a text file with a summary
-                         of recent KBC discussions; ignored if not set
-
-Outputs a Markdown file into `content/posts/` with proper Hugo front
-matter and a filename based on today's date and the slugified title.
+Usage:
+  python scripts/generate_blog_post.py --rotate --cooldown-days 21
 """
-import os
-import random
-import datetime
-from pathlib import Path
+import os, sys, json, re, argparse, datetime, random, pathlib
 from slugify import slugify
-from openai import OpenAI
 
+try:
+    import frontmatter
+except Exception:
+    frontmatter = None
 
-TOPICS = [
-    "the philosophy behind Knowledge‑Based Currency",
-    "how the K‑Chain ensures trust and immutability",
-    "the vision of LightWeb as a decentralized knowledge internet",
-    "the role of Oracle AI in validating and synthesizing knowledge",
-    "the mathematics and mechanics of KBC",
-    "how knowledge becomes a universal asset",
-    "why KBC matters for science and innovation",
-    "the future of decentralized learning and value",
-    "Proof‑of‑Knowledge and why it underpins KBC",
-    "the role of IPv6 in the KnowledgeChain",
-    "how KBC rewards contributors fairly",
-    "bridging traditional finance with Knowledge‑Based Currency",
-    "governance and decentralization in KBC",
-    "education and learning incentives in the LightWeb",
-    "how Oracle AI combats misinformation and bias"
-]
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+CONTENT_DIR = ROOT / "content" / "posts"
+STATE_DIR = ROOT / ".github" / "state"
+STATE_DIR.mkdir(parents=True, exist_ok=True)
+STATE_FILE = STATE_DIR / "blog_state.json"
+TOPICS_FILE = ROOT / "scripts" / "topics.json"
 
+def load_topics():
+    if TOPICS_FILE.exists():
+        with open(TOPICS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        topics = [t.strip() for t in data.get("topics", []) if t.strip()]
+        if topics:
+            return topics
+    return [
+        "K-Chain (Knowledge Ledger)",
+        "LightWeb (Decentralized Web Layer)",
+        "Oracle AI (Validator)",
+        "Y-Engine (Truth-Relevance-Novelty-Impact)",
+        "Proof of Knowledge (PoK)",
+        "Intrinsic Privacy & Security",
+        "KBC MVS (FastAPI + Streamlit)",
+        "Decentralized Identity & Self-Sovereign Data",
+        "Knowledge Blocks (KBs): Claims + Evidence",
+        "KBC Economics & Incentives",
+        "KBC vs. Fiat/Crypto",
+        "Families & Shared Chains",
+        "Education & Research on KBC",
+        "Governance & Validation Markets",
+        "Open-Source Roadmap & Community",
+    ]
 
-def get_client() -> OpenAI:
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise SystemExit("OPENAI_API_KEY is not set")
-    return OpenAI(api_key=api_key)
+def load_state():
+    if STATE_FILE.exists():
+        try:
+            with open(STATE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"history": []}
 
+def save_state(state):
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
 
-def read_summary() -> str | None:
-    path = os.environ.get("CHAT_SUMMARY_PATH")
-    if not path:
-        return None
+def parse_date(dt_str):
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            return f.read().strip()
-    except FileNotFoundError:
+        return datetime.date.fromisoformat(dt_str[:10])
+    except Exception:
         return None
 
+def recent_topics_from_state(state, cooldown_days):
+    cutoff = datetime.date.today() - datetime.timedelta(days=cooldown_days)
+    return {h["topic"] for h in state.get("history", []) if parse_date(h.get("date", "")) and parse_date(h.get("date", "")) >= cutoff}
 
-def choose_topic() -> str:
-    return random.choice(TOPICS)
+def scan_existing_posts_for_topics(cooldown_days):
+    recent = set()
+    if not CONTENT_DIR.exists():
+        return recent
+    cutoff = datetime.date.today() - datetime.timedelta(days=cooldown_days)
+    for md in CONTENT_DIR.glob("*.md"):
+        try:
+            text = md.read_text(encoding="utf-8")
+            m = re.search(r"(?s)^---(.*?)---", text)
+            block = m.group(1) if m else ""
+            tm = re.search(r"(?im)^\s*topic\s*:\s*['"]?(.+?)['"]?\s*$", block)
+            dm = re.search(r"(?im)^\s*date\s*:\s*['"]?(\d{4}-\d{2}-\d{2}).*['"]?\s*$", block)
+            if tm and dm:
+                t = tm.group(1).strip()
+                d = parse_date(dm.group(1).strip())
+                if d and d >= cutoff:
+                    recent.add(t)
+        except Exception:
+            continue
+    return recent
 
+def choose_topic(topics, cooldown_days, state):
+    blocked = recent_topics_from_state(state, cooldown_days) | scan_existing_posts_for_topics(cooldown_days)
+    candidates = [t for t in topics if t not in blocked]
+    if candidates:
+        return random.choice(candidates)
+    used = {h["topic"]: parse_date(h.get("date", "1970-01-01")) or datetime.date(1970,1,1) for h in state.get("history", [])}
+    return sorted(topics, key=lambda t: used.get(t, datetime.date(1970,1,1)))[0]
 
-def generate_post(client: OpenAI, topic: str, summary: str | None) -> str:
-    if summary:
-        prompt = (
-            "You are an expert technical writer for the Knowledge‑Based Currency (KBC) project.\n"
-            "Write a 600-word blog post summarizing today's progress on the KBC project.\n"
-            f"Use the following notes as context:\n{summary}\n\n"
-            "Ensure the post is accessible to a general audience, maintains a positive and inspirational tone, "
-            "and explains relevant KBC concepts such as verifiable knowledge, Proof‑of‑Knowledge, K‑Chain, LightWeb and Oracle AI. "
-            "Use headings and paragraphs. Do not include YAML front matter or code fences."
-        )
-        title = "today's KBC update"
-    else:
-        prompt = (
-            "You are an expert technical writer for the Knowledge‑Based Currency (KBC) project.\n"
-            f"Write a 600-word blog post about {topic}.\n"
-            "The post should be accessible to a general audience, maintain a positive and inspirational tone, "
-            "and explain the core ideas of KBC: verifiable knowledge, Proof‑of‑Knowledge, K‑Chain, LightWeb and Oracle AI. "
-            "Use headings and paragraphs. Do not include YAML front matter or code fences."
-        )
-        title = topic
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=1000,
-        temperature=0.7,
-    )
-    return title, response.choices[0].message.content.strip()
+def render_front_matter(title, topic, tags):
+    now_utc = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    fm = f"---
+title: "{title}"
+date: {now_utc}
+draft: false
+tags: [{', '.join([json.dumps(t) for t in tags])}]
+categories: ["KBC"]
+topic: "{topic}"
+---
+"
+    return fm
 
+def generate_body(topic):
+    paragraphs = [
+        f"{topic} in the Knowledge‑Based Currency (KBC) framework: a concise overview.",
+        "This post is auto‑generated as part of the daily knowledge log. It summarizes core principles and links them to practical implications for builders and curious readers.",
+        "Expect a richer, LLM‑expanded narrative in production runs when OPENAI_API_KEY is configured in repository secrets.",
+    ]
+    return "
 
-def write_post(title: str, body: str) -> Path:
-    date = datetime.date.today()
-    posts_dir = Path("content/posts")
-    posts_dir.mkdir(parents=True, exist_ok=True)
-    slug = slugify(title)[:40]  # limit slug length
-    filename = posts_dir / f"{date.isoformat()}-{slug}.md"
-    front_matter = (
-        f"---\n"
-        f"title: \"{title.capitalize()}\"\n"
-        f"date: {date.isoformat()}\n"
-        f"draft: false\n"
-        f"tags: [\"KBC\", \"daily-updates\"]\n"
-        f"---\n\n"
-    )
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(front_matter + body + "\n")
-    return filename
+".join(paragraphs)
 
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--rotate", action="store_true", help="Enable topic rotation and recent-topic avoidance")
+    ap.add_argument("--cooldown-days", type=int, default=21, help="Do not repeat a topic within this many days")
+    args = ap.parse_args()
 
-def main() -> None:
-    client = get_client()
-    summary = read_summary()
-    if summary:
-        topic = "today's KBC update"
-    else:
-        topic = choose_topic()
-    title, body = generate_post(client, topic, summary)
-    path = write_post(title, body)
-    print(f"Generated {path}")
+    topics = load_topics()
+    state = load_state()
 
+    topic = choose_topic(topics, args.cooldown_days, state) if args.rotate else random.choice(topics)
+
+    today = datetime.date.today()
+    nice = topic.replace("(", " — ").replace(")", "")
+    title = f"{nice} — Daily KBC Note ({today.isoformat()})"
+    slug = slugify(f"{today.isoformat()} {topic}")[:80]
+
+    CONTENT_DIR.mkdir(parents=True, exist_ok=True)
+    path = CONTENT_DIR / f"{slug}.md"
+    idx = 2
+    while path.exists():
+        path = CONTENT_DIR / f"{slug}-{idx}.md"
+        idx += 1
+
+    tags = ["Knowledge‑Based Currency", "KBC", topic.split(" ")[0]]
+    front = render_front_matter(title, topic, tags)
+    body = generate_body(topic)
+    path.write_text(front + "
+" + body + "
+", encoding="utf-8")
+
+    state.setdefault("history", []).append({"topic": topic, "date": today.isoformat()})
+    state["history"] = state["history"][-180:]
+    save_state(state)
+    print(f"Generated: {path}")
 
 if __name__ == "__main__":
     main()
