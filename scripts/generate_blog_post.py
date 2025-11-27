@@ -92,16 +92,16 @@ def choose_topic(topics, cooldown_days, state):
 
 def render_front_matter(title, topic, tags):
     now_utc = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-    fm = textwrap.dedent(
-        f"""---
-        title: "{title}"
-        date: {now_utc}
-        draft: false
-        tags: [{', '.join([json.dumps(t) for t in tags])}]
-        categories: ["KBC"]
-        topic: "{topic}"
-        ---
-        """
+    tags_list = ", ".join(json.dumps(t) for t in tags)
+    return (
+        f"---\n"
+        f"title: \"{title}\"\n"
+        f"date: {now_utc}\n"
+        f"draft: false\n"
+        f"tags: [{tags_list}]\n"
+        f"categories: [\"KBC\"]\n"
+        f"topic: \"{topic}\"\n"
+        f"---\n"
     )
     return fm
 
