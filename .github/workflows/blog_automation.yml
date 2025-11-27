@@ -3,7 +3,7 @@ name: Blog automation
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 6,18 * * *'
+    - cron: '0 6,18 * * *'   # twice daily
 
 permissions:
   contents: write
@@ -12,12 +12,22 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
+      # 1. Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: true
 
+      # 2. Initialise submodules so the PaperMod theme is available
+      - name: Init theme submodule
+        run: git submodule update --init --recursive
+
+      # 3. (Optional) Remove previous build output to avoid stale files
+      - name: Clean old site
+        run: rm -rf website || true
+
+      # 4. Setup Python environment
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -26,23 +36,24 @@ jobs:
       - name: Install dependencies
         run: pip install python-slugify
 
+      # 5. Generate a new blog post (rotating through 100 topics)
       - name: Generate blog post
-        env:
+      env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python scripts/generate_blog_post.py --rotate
+      run: python scripts/generate_blog_post.py --rotate
 
-      - name: Cleanup stray posts
-        run: rm -rf content/posts/*.md || true
-
+      # 6. Setup Hugo (extended) for build
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: 'latest'
           extended: true
 
+      # 7. Build the site normally
       - name: Build site
-        run: hugo --minify --source .
+        run: hugo --minify
 
+      # 8. Commit and push any new posts or build artifacts
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
