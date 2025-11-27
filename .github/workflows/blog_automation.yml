@@ -1,10 +1,13 @@
 name: Blog automation
 
 on:
+  # Allow manual triggering via the Actions tab
   workflow_dispatch:
+  # Run twice daily at 06:00 and 18:00 UTC
   schedule:
-    - cron: '0 6,18 * * *'   # twice daily
+    - cron: '0 6,18 * * *'
 
+# Grant the job permission to push changes back to the repository
 permissions:
   contents: write
 
@@ -12,56 +15,55 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout code
+      # Checkout the repository and fetch submodules so the theme is available
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
           persist-credentials: true
 
-      # 2. Initialise submodules so the PaperMod theme is available
-      - name: Init theme submodule
-        run: git submodule update --init --recursive
-
-      # 3. (Optional) Remove previous build output to avoid stale files
+      # Optional: clean up any previous build artifacts from prior runs
       - name: Clean old site
         run: rm -rf website || true
 
-      # 4. Setup Python environment
+      # Set up Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      # Install Python dependencies required for blog generation
       - name: Install dependencies
-        run: pip install python-slugify
+        run: pip install python-slugify openai requests
 
-      # 5. Generate a new blog post (rotating through 100 topics)
+      # Generate the blog post using the script
       - name: Generate blog post
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
         run: python scripts/generate_blog_post.py --rotate
 
-      # 6. Setup Hugo (extended) for build
+      # Set up Hugo (extended version) for site build
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: 'latest'
           extended: true
 
-      # 7. Build the site normally
+      # Build the site; rely on Hugo defaults for source directory and themes
       - name: Build site
         run: hugo --minify
 
-      # 8. Commit and push any new posts or build artifacts
+      # Commit and push any changes back to the repository
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Stage files that may change: generated posts, public folder, and state file
           if [ -n "$(git status --porcelain)" ]; then
             git add content/posts public scripts/.blog_state.json
             git commit -m "chore: automated blog post"
             git push
           else
             echo "No changes to commit"
-          fi
