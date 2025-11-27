@@ -4,7 +4,9 @@
  * These rules set CSS variables based on that class so both the built‑in
  * and any custom theme toggler will work.  When the body has the
  * `dark` class, the dark palette applies; when it does not, the light
- * palette applies. */
+ * palette applies.
+ */
+
 /* Define separate palettes for dark and light modes.  Both use the
  * signature KBC colours—matte black (#121212), shiny gold (#D4AF37)
  * and blood red (#B22222)—but light mode reverses the foreground and
@@ -98,7 +100,6 @@ nav a:hover,
 nav a.active {
   color: #B22222;
 }
-
 
 /* Highlight classes (buttons, links) */
 .highlight, .btn, .link {
