@@ -1,175 +1,53 @@
-diff --git a/.github/workflows/blog_automation.yml b/.github/workflows/blog_automation.yml
-index c71e2507fd38cd5f06a397244c7ebfbcefb02f23..2582c3c5696b686d51c8b387db36823888f3b51b 100644
---- a/.github/workflows/blog_automation.yml
-+++ b/.github/workflows/blog_automation.yml
-@@ -1,117 +1,53 @@
--diff --git a/scripts/generate_blog_post.py b/scripts/generate_blog_post.py
--index 86f3dfb8dc6e1fff6181235340a98750867ae91e..a72ab250cc5887e0c873db85b8a935e7dfff6878 100644
----- a/scripts/generate_blog_post.py
--+++ b/scripts/generate_blog_post.py
--@@ -63,104 +63,102 @@ def load_state():
-- 
-- def save_state(state):
--     with open(STATE_FILE, "w", encoding="utf-8") as f:
--         json.dump(state, f, indent=2, ensure_ascii=False)
-- 
-- def parse_date(dt_str):
--     try:
--         return datetime.date.fromisoformat(dt_str[:10])
--     except Exception:
--         return None
-- 
-- def recent_topics_from_state(state, cooldown_days):
--     cutoff = datetime.date.today() - datetime.timedelta(days=cooldown_days)
--     return {h["topic"] for h in state.get("history", []) if parse_date(h.get("date", "")) and parse_date(h.get("date", "")) >= cutoff}
-- 
-- def scan_existing_posts_for_topics(cooldown_days):
--     recent = set()
--     if not CONTENT_DIR.exists():
--         return recent
--     cutoff = datetime.date.today() - datetime.timedelta(days=cooldown_days)
--     for md in CONTENT_DIR.glob("*.md"):
--         try:
--             text = md.read_text(encoding="utf-8")
--             m = re.search(r"(?s)^---(.*?)---", text)
--             block = m.group(1) if m else ""
---            tm = re.search(r"(?im)^\s*topic\s*:\s*['"]?(.+?)['"]?\s*$", block)
---            dm = re.search(r"(?im)^\s*date\s*:\s*['"]?(\d{4}-\d{2}-\d{2}).*['"]?\s*$", block)
--+            # Extract topic from front matter with optional quotes and whitespace around the key and value.
--+            tm = re.search(r"(?im)^\s*topic\s*:\s*['\"]?(.*?)['\"]?\s*$", block)
--+            # Extract date in YYYY-MM-DD format from the front matter with optional quotes.
--+            dm = re.search(r"(?im)^\s*date\s*:\s*['\"]?(\d{4}-\d{2}-\d{2}).*['\"]?\s*$", block)
--             if tm and dm:
--                 t = tm.group(1).strip()
--                 d = parse_date(dm.group(1).strip())
--                 if d and d >= cutoff:
--                     recent.add(t)
--         except Exception:
--             continue
--     return recent
-- 
-- def choose_topic(topics, cooldown_days, state):
--     blocked = recent_topics_from_state(state, cooldown_days) | scan_existing_posts_for_topics(cooldown_days)
--     candidates = [t for t in topics if t not in blocked]
--     if candidates:
--         return random.choice(candidates)
--     used = {h["topic"]: parse_date(h.get("date", "1970-01-01")) or datetime.date(1970,1,1) for h in state.get("history", [])}
--     return sorted(topics, key=lambda t: used.get(t, datetime.date(1970,1,1)))[0]
-- 
-- def render_front_matter(title, topic, tags):
--     now_utc = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
---    fm = f"---
--+    fm = f"""---
-- title: "{title}"
-- date: {now_utc}
-- draft: false
-- tags: [{', '.join([json.dumps(t) for t in tags])}]
-- categories: ["KBC"]
-- topic: "{topic}"
-- ---
---"
--+"""
--     return fm
-- 
-- def generate_body(topic):
--     paragraphs = [
--         f"{topic} in the Knowledge‑Based Currency (KBC) framework: a concise overview.",
--         "This post is auto‑generated as part of the daily knowledge log. It summarizes core principles and links them to practical implications for builders and curious readers.",
--         "Expect a richer, LLM‑expanded narrative in production runs when OPENAI_API_KEY is configured in repository secrets.",
--     ]
---    return "
---
---".join(paragraphs)
--+    return "\n\n".join(paragraphs)
-- 
-- def main():
--     ap = argparse.ArgumentParser()
--     ap.add_argument("--rotate", action="store_true", help="Enable topic rotation and recent-topic avoidance")
--     ap.add_argument("--cooldown-days", type=int, default=21, help="Do not repeat a topic within this many days")
--     args = ap.parse_args()
-- 
--     topics = load_topics()
--     state = load_state()
-- 
--     topic = choose_topic(topics, args.cooldown_days, state) if args.rotate else random.choice(topics)
-- 
--     today = datetime.date.today()
--     nice = topic.replace("(", " — ").replace(")", "")
--     title = f"{nice} — Daily KBC Note ({today.isoformat()})"
--     slug = slugify(f"{today.isoformat()} {topic}")[:80]
-- 
--     CONTENT_DIR.mkdir(parents=True, exist_ok=True)
--     path = CONTENT_DIR / f"{slug}.md"
--     idx = 2
--     while path.exists():
--         path = CONTENT_DIR / f"{slug}-{idx}.md"
--         idx += 1
-- 
--     tags = ["Knowledge‑Based Currency", "KBC", topic.split(" ")[0]]
--     front = render_front_matter(title, topic, tags)
--     body = generate_body(topic)
---    path.write_text(front + "
---" + body + "
---", encoding="utf-8")
--+    path.write_text(front + "\n\n" + body + "\n", encoding="utf-8")
-- 
--     state.setdefault("history", []).append({"topic": topic, "date": today.isoformat()})
--     state["history"] = state["history"][-180:]
--     save_state(state)
--     print(f"Generated: {path}")
-- 
-- if __name__ == "__main__":
--     main()
-+name: Blog automation
-+
-+on:
-+  workflow_dispatch:
-+  schedule:
-+    - cron: '0 6,18 * * *'
-+
-+permissions:
-+  contents: write
-+
-+jobs:
-+  generate:
-+    runs-on: ubuntu-latest
-+    steps:
-+      - name: Checkout repository
-+        uses: actions/checkout@v4
-+        with:
-+          fetch-depth: 0
-+          persist-credentials: true
-+
-+      - name: Setup Python
-+        uses: actions/setup-python@v5
-+        with:
-+          python-version: '3.11'
-+
-+      - name: Install dependencies
-+        run: pip install python-slugify
-+
-+      - name: Generate blog post
-+        env:
-+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-+        run: python scripts/generate_blog_post.py --rotate
-+
-+      - name: Setup Hugo
-+        uses: peaceiris/actions-hugo@v3
-+        with:
-+          hugo-version: 'latest'
-+          extended: true
-+
-+      - name: Build site
-+        run: hugo --minify
-+
-+      - name: Commit and push changes
-+        run: |
-+          git config user.name "github-actions[bot]"
-+          git config user.email "github-actions[bot]@users.noreply.github.com"
-+          if [ -n "$(git status --porcelain)" ]; then
-+            git add content/posts public scripts/.blog_state.json
-+            git commit -m "chore: automated blog post"
-+            git push
-+          else
-+            echo "No changes to commit"
-+          fi
+name: Blog automation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6,18 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install python-slugify
+
+      - name: Generate blog post
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python scripts/generate_blog_post.py --rotate
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+          extended: true
+
+      - name: Build site
+        run: hugo --minify
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add content/posts public scripts/.blog_state.json
+            git commit -m "chore: automated blog post"
+            git push
+          else
+            echo "No changes to commit"
+          fi
