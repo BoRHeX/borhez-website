@@ -1,58 +1,62 @@
-name: Generate & Deploy Blog
-
-on:
-  schedule:
-    - cron: '5 6,18 * * *'
-  workflow_dispatch:
-
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
-jobs:
-  generate-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: recursive
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install Python deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install python-frontmatter pyyaml python-slugify
-      - name: Generate blog post
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python scripts/generate_blog_post.py --rotate --cooldown-days 21
-      - name: Commit changes (if any)
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "chore(blog): automated post + rotation state [skip ci]"
-            git push
-      - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v3
-        with:
-          hugo-version: '0.135.0'
-          extended: true
-      - name: Build site
-        run: |
-          hugo --minify
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          publish_branch: gh-pages
+diff --git a/.github/workflows/blog_automation.yml b/.github/workflows/blog_automation.yml
+index a7d01db786e8b763defcb2946e41f3c881ee6ea7..4d54030768155464e09c28711593a29078375251 100644
+--- a/.github/workflows/blog_automation.yml
++++ b/.github/workflows/blog_automation.yml
+@@ -8,51 +8,55 @@ on:
+ permissions:
+   contents: write
+   pages: write
+   id-token: write
+ 
+ jobs:
+   generate-and-deploy:
+     runs-on: ubuntu-latest
+     steps:
+       - name: Checkout
+         uses: actions/checkout@v4
+         with:
+           fetch-depth: 0
+           submodules: recursive
+       - name: Setup Python
+         uses: actions/setup-python@v5
+         with:
+           python-version: '3.11'
+       - name: Install Python deps
+         run: |
+           python -m pip install --upgrade pip
+           pip install python-frontmatter pyyaml python-slugify
+       - name: Generate blog post
+         env:
+           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
++          PRE_COMMIT_HOME: ${{ runner.temp }}/pre-commit-cache
++          XDG_CACHE_HOME: ${{ runner.temp }}/cache
+         run: |
++          mkdir -p "$PRE_COMMIT_HOME" "$XDG_CACHE_HOME"
+           python scripts/generate_blog_post.py --rotate --cooldown-days 21
+       - name: Commit changes (if any)
+         run: |
+           git config user.name "github-actions[bot]"
+           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+           git add -A
+           if git diff --cached --quiet; then
+             echo "No changes to commit."
+           else
+             git commit -m "chore(blog): automated post + rotation state [skip ci]"
+             git push
++          fi
+       - name: Setup Hugo
+         uses: peaceiris/actions-hugo@v3
+         with:
+           hugo-version: '0.135.0'
+           extended: true
+       - name: Build site
+         run: |
+           hugo --minify
+       - name: Deploy to GitHub Pages
+         uses: peaceiris/actions-gh-pages@v4
+         with:
+           github_token: ${{ secrets.GITHUB_TOKEN }}
+           publish_dir: ./public
+-          publish_branch: gh-pages
+\ No newline at end of file
++          publish_branch: gh-pages
