@@ -38,9 +38,9 @@ jobs:
 
       # 5. Generate a new blog post (rotating through 100 topics)
       - name: Generate blog post
-      env:
+        env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      run: python scripts/generate_blog_post.py --rotate
+        run: python scripts/generate_blog_post.py --rotate
 
       # 6. Setup Hugo (extended) for build
       - name: Setup Hugo
