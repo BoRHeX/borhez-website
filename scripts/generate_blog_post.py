@@ -54,6 +54,21 @@ if not OPENAI_API_KEY:
 # Initialize an OpenAI client.  In openai>=1.0, ChatCompletion is accessed via the client.
 openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
+# Static introduction that encapsulates the core vision of KBC.
+# Including this explanatory context in the prompt helps the language model
+# maintain consistency with previous posts and ensures it covers
+# fundamental concepts (e.g. K‑Chain, LightWeb, Oracle AI).
+KBC_OVERVIEW = (
+    "Knowledge‑Based Currency (KBC) is a visionary platform that turns verifiable "
+    "knowledge into a secure digital asset.  It relies on a distributed ledger "
+    "called K‑Chain to store immutable knowledge claims and on LightWeb, a "
+    "decentralized network for sharing information efficiently.  Oracle AI serves "
+    "as the intelligent engine that validates and retrieves knowledge on demand.  "
+    "KBC replaces traditional proofs of work or stake with Proof‑of‑Knowledge, "
+    "rewarding contributors for their expertise and fostering a trustworthy, "
+    "inclusive knowledge economy."
+)
+
 
 def load_topics() -> list[str]:
     """Load the list of topics from the JSON file."""
@@ -132,14 +147,17 @@ def generate_post_body(topic: str, news_items: list[str]) -> str:
     """Call OpenAI to generate a blog post body for the given topic."""
     # Build the prompt detailing structure, tone and including news items
     news_section = "\n".join(news_items) if news_items else "No recent news available."
+    # Build a rich prompt incorporating a high‑level overview of the KBC vision.
     prompt = (
-        f"You are a knowledgeable technical writer for the Knowledge‑Based Currency (KBC) project.\n"
-        f"Write a blog post about the topic **{topic}**. Start with a concise overview of the topic "
-        f"and why it matters to KBC. Then include a section titled 'Recent News' summarising the following "
-        f"bullet points (if any), using them to inform the narrative:\n{news_section}\n\n"
-        f"Use Markdown formatting throughout: include level‑2 headings (##) for each section, such as 'Overview', 'Recent News', "
-        f"and 'Conclusion'. Use bullet points to list the news headlines. In the conclusion, connect the topic back to the "
-        f"broader KBC ecosystem and suggest questions for readers. Write in a clear, friendly tone for technically curious readers."
+        "You are a passionate technical writer for the Knowledge‑Based Currency (KBC) project. "
+        "Your goal is to educate and inspire readers about KBC by connecting each topic to its core values and technologies.\n\n"
+        f"Background on KBC: {KBC_OVERVIEW}\n\n"
+        f"Write an in‑depth blog post about **{topic}**. Start with an engaging introduction explaining what the topic is and why it matters to KBC. "
+        f"Then create an 'Overview' section that delves into the topic's key principles and how KBC's foundations (K‑Chain, LightWeb, Oracle AI, Proof‑of‑Knowledge) relate to it. "
+        f"After that, include a 'Recent News' section where you summarise the following bullet points (if any) in your own words, connecting them to the topic:\n{news_section}\n\n"
+        "Use Markdown formatting: introduce each section with a level‑2 heading (##), use bullet points where appropriate, and include descriptive subheadings if helpful. "
+        "Write in an enthusiastic yet accessible tone, weaving in analogies or examples to make complex concepts approachable. "
+        f"In the conclusion, reflect on how {topic} advances the vision of a decentralized knowledge economy and invite readers to ponder their role in shaping the future of KBC."
     )
 
     # Use the new chat API (openai>=1.0) via the client
