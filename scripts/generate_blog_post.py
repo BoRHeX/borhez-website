@@ -51,7 +51,8 @@ if not OPENAI_API_KEY:
         "Please add it to your repository secrets or local environment."
     )
 
-openai.api_key = OPENAI_API_KEY
+# Initialize an OpenAI client.  In openai>=1.0, ChatCompletion is accessed via the client.
+openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 
 def load_topics() -> list[str]:
@@ -141,14 +142,16 @@ def generate_post_body(topic: str, news_items: list[str]) -> str:
         f"broader KBC ecosystem and suggest questions for readers. Write in a clear, friendly tone for technically curious readers."
     )
 
-    response = openai.ChatCompletion.create(
+    # Use the new chat API (openai>=1.0) via the client
+    completion = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=800,
         temperature=0.6,
         n=1,
     )
-    return response.choices[0].message["content"].strip()
+    # Extract the generated content from the first choice
+    return completion.choices[0].message.content.strip()
 
 
 def save_markdown(title: str, topic: str, body: str) -> Path:
