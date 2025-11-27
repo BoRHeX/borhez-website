@@ -31,6 +31,24 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python scripts/generate_blog_post.py --rotate
 
+    - name: Generate blog post
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: python scripts/generate_blog_post.py --rotate
+
+    - name: Cleanup stray posts
+      run: rm -rf website/content/posts || true
+
+    - name: Setup Hugo
+      uses: peaceiris/actions-hugo@v3
+      with:
+        hugo-version: 'latest'
+        extended: true
+
+    - name: Build site
+      run: hugo --minify --source .
+
+
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
