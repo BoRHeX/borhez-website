@@ -44,6 +44,17 @@ authentication widget and an automated blog generation workflow.
   generated. For testing, you can trigger the workflow manually via
   the GitHub UI.
 
+## Automated Blog Posts
+
+This repository generates and publishes blog posts automatically. A GitHub Actions workflow
+(`blog_automation.yml`) runs twice a day and can also be triggered manually from the Actions tab
+(because it includes the `workflow_dispatch` trigger). It uses the OpenAI API to draft content.
+
+Topic rotation is controlled via `scripts/topics.json`, which currently contains 100 unique topics.
+The workflow now initialises the PaperMod theme submodule, cleans up any stale build output, and
+ensures that Hugo builds correctly.
+
+
 ## Running Locally
 
 To build the site locally, install Hugo extended (version 0.146.0 or
