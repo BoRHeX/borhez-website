@@ -1,68 +1,37 @@
-name: Auto Update and Deploy
+name: Deploy Hugo site to GitHub Pages
 
-# This workflow automatically rebuilds and deploys the site when new content is
-# available or on a regular schedule. It ensures that your blog posts are
-# reflected on the live site without requiring a manual trigger.
+# This workflow builds the Hugo site and deploys it to the gh-pages branch.
+# It runs automatically on pushes to the main branch, on a schedule, or when manually triggered.
 
 on:
-  # Re-run the workflow whenever changes are pushed to the default branch.
   push:
     branches:
       - main
-  # Allow manual triggering from the GitHub Actions UI.
   workflow_dispatch:
-  # Schedule a build every hour (UTC) to pick up any new content sources
-  # (e.g. headless CMS feeds or third‑party APIs) that may not trigger a
-  # push event. Adjust the cron expression as needed.
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 * * * *' # hourly schedule
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # Avoid running multiple builds concurrently. If a new run is triggered
-    # while an older one is still in progress, cancel the older run.
     concurrency:
       group: deploy
       cancel-in-progress: true
     steps:
-      # Checkout the repository's code so the workflow can access it.
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install and configure Node.js. Adjust the version according to
-      # your project's requirements (e.g. 18.x, 20.x). This example uses 20.x.
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
         with:
-          node-version: '20'
+          hugo-version: '0.115.4'
+          extended: true
 
-      # Install dependencies. Customize this step if your project uses a
-      # different package manager (e.g. yarn, pnpm) or additional build steps.
-      - name: Install dependencies
-        run: |
-          if [ -f package.json ]; then
-            npm install
-          fi
+      - name: Build site
+        run: hugo --minify
 
-      # Build the static site. This step assumes your project defines a
-      # `build` script in its package.json that outputs to a folder such as
-      # `dist` or `build`. Update the command if your build process differs.
-      - name: Build the site
-        run: |
-          if [ -f package.json ]; then
-            npm run build
-          else
-            echo "No package.json found; skipping build step."
-          fi
-
-      # Deploy the build output to the `gh-pages` branch. If your project
-      # publishes to a different branch or uses a deployment platform such as
-      # Netlify or Vercel, replace this step with the appropriate deploy
-      # action. This example uses the popular peaceiris/actions-gh-pages
-      # action to publish the contents of the `dist` directory to GitHub Pages.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./public
