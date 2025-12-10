@@ -10,7 +10,7 @@
 
 {{- /* Keywords (optional) */ -}}
 {{ with .Site.Params.keywords }}
-  {{ if kindIs "string" . }}
+  {{ if isString . }}
     <meta name="keywords" content="{{ . }}" />
   {{ else }}
     <meta name="keywords" content="{{ delimit . ", " }}" />
