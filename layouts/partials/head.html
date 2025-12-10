@@ -1,0 +1,65 @@
+{{- /* layouts/partials/head.html */ -}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ with .Site.Params.titleDivider }}{{ printf " %s " . }}{{ end }}{{ .Site.Title }}{{ end }}</title>
+
+{{- /* Description */ -}}
+{{ $desc := .Description | default .Params.description | default .Site.Params.description }}
+{{ if $desc }}<meta name="description" content="{{ $desc | plainify | html }}" />{{ end }}
+
+{{- /* Keywords (optional) */ -}}
+{{ with .Site.Params.keywords }}<meta name="keywords" content="{{ . | join ", " }}" />{{ end }}
+
+{{- /* Canonical */ -}}
+<link rel="canonical" href="{{ .Permalink }}">
+
+{{- /* Favicon - fallback to /favicon.ico if no param provided */ -}}
+<link rel="icon" href="{{ with .Site.Params.favicon }}{{ . | relURL }}{{ else }}/favicon.ico{{ end }}" type="image/x-icon">
+
+{{- /* RSS */ -}}
+<link rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" href="{{ "index.xml" | relURL }}">
+
+{{- /* Theme color - optional param */ -}}
+{{ with .Site.Params.themeColor }}<meta name="theme-color" content="{{ . }}">{{ end }}
+
+{{- /* Open Graph / Twitter */ -}}
+<meta property="og:site_name" content="{{ .Site.Title }}">
+<meta property="og:title" content="{{ with .Params.ogTitle }}{{ . }}{{ else if .Title }}{{ .Title }}{{ else }}{{ .Site.Title }}{{ end }}">
+<meta property="og:description" content="{{ $desc | default .Site.Params.description | plainify | html }}">
+<meta property="og:url" content="{{ .Permalink }}">
+{{- /* OG type: article for pages with date, otherwise website */ -}}
+<meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+
+{{- /* choose image - page param, site param, or omit */ -}}
+{{ with or .Params.images (slice .Params.image) (slice .Site.Params.social.image) }}
+  {{ $img := index . 0 }}
+  <meta property="og:image" content="{{ $img | absURL }}">
+  <meta name="twitter:image" content="{{ $img | absURL }}">
+{{ end }}
+
+<meta name="twitter:card" content="{{ if (or (isset .Params "image") .Site.Params.social.image) }}summary_large_image{{ else }}summary{{ end }}">
+<meta name="twitter:title" content="{{ with .Params.twitterTitle }}{{ . }}{{ else if .Title }}{{ .Title }}{{ else }}{{ .Site.Title }}{{ end }}">
+<meta name="twitter:description" content="{{ $desc | plainify | html }}">
+
+{{- /* CSS: prefer Hugo resources fingerprinting; fallback to static css */ -}}
+{{ with resources.Get "css/styles.css" }}
+  {{ $styles := . | resources.Minify | resources.Fingerprint "sha384" }}
+  <link rel="stylesheet" href="{{ $styles.RelPermalink }}" integrity="{{ $styles.Data.Integrity }}">
+{{ else }}
+  <link rel="stylesheet" href="{{ "css/styles.css" | relURL }}">
+{{ end }}
+
+{{- /* Load any extra head HTML from site params (for analytics, verification tags, etc.) */ -}}
+{{ with .Site.Params.extraHead }}{{ . | safeHTML }}{{ end }}
+
+{{- /* Google Analytics (gtag) optional example - set Site.Params.gtag = 'G-XXXX' */ -}}
+{{ with .Site.Params.gtag }}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ . }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);} 
+    gtag('js', new Date());
+    gtag('config', '{{ . }}', { 'anonymize_ip': {{ default true .Site.Params.gaAnonymizeIP }} });
+  </script>
+{{ end }}
