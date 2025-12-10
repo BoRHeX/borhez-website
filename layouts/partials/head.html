@@ -9,7 +9,13 @@
 {{ if $desc }}<meta name="description" content="{{ $desc | plainify | html }}" />{{ end }}
 
 {{- /* Keywords (optional) */ -}}
-{{ with .Site.Params.keywords }}<meta name="keywords" content="{{ . | join ", " }}" />{{ end }}
+{{ with .Site.Params.keywords }}
+  {{ if kindIs "string" . }}
+    <meta name="keywords" content="{{ . }}" />
+  {{ else }}
+    <meta name="keywords" content="{{ delimit . ", " }}" />
+  {{ end }}
+{{ end }}
 
 {{- /* Canonical */ -}}
 <link rel="canonical" href="{{ .Permalink }}">
