@@ -5,17 +5,9 @@
 <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ with .Site.Params.titleDivider }}{{ printf " %s " . }}{{ end }}{{ .Site.Title }}{{ end }}</title>
 
 {{- /* Description */ -}}
-{{ $desc := .Description | default .Params.description | default .Site.Params.description }}
+{{ $desc := .Description | default .Params.description | default .Site.Title }}
 {{ if $desc }}<meta name="description" content="{{ $desc | plainify | html }}" />{{ end }}
 
-{{- /* Keywords (optional) */ -}}
-{{ with .Site.Params.keywords }}
-  {{ if isString . }}
-    <meta name="keywords" content="{{ . }}" />
-  {{ else }}
-    <meta name="keywords" content="{{ delimit . ", " }}" />
-  {{ end }}
-{{ end }}
 
 {{- /* Canonical */ -}}
 <link rel="canonical" href="{{ .Permalink }}">
