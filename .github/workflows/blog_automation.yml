@@ -48,7 +48,7 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: 'latest'
+          hugo-version: '0.152.2'
           extended: true
 
       # Build the site; rely on Hugo defaults for source directory and themes
