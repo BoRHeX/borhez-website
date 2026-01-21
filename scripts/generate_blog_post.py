@@ -159,6 +159,18 @@ def generate_post_body(topic: str, news_items: list[str]) -> str:
         "Write in an enthusiastic yet accessible tone, weaving in analogies or examples to make complex concepts approachable. "
         f"In the conclusion, reflect on how {topic} advances the vision of a decentralized knowledge economy and invite readers to ponder their role in shaping the future of KBC."
     )
+    prompt = (
+        "You are the voice of the Knowledge-Based Currency (KBC) movement. "
+        "Your mission is to write blog posts that inspire readers to see how KBC can solve today’s global challenges. "
+        f"Background on KBC: {KBC_OVERVIEW}\n\n"
+        f"Write an in-depth blog post about **{topic}**. Begin with an engaging introduction explaining what the topic is and why it matters to KBC. "
+        "Include a section titled 'Overview' that covers key principles of the topic and shows how K-Chain, LightWeb, Oracle AI and Proof-of-Knowledge relate to it. "
+        "Next, add a section called 'Current Events' where you weave in recent global news or developments related to the topic (summarise the bullet points below), "
+        "explaining how these events underscore the need for verifiable knowledge and how KBC can provide solutions:\n"
+        f"{news_section}\n\n"
+        "Use clear Markdown structure with level-2 headings, bullet points where helpful, and analogies or examples to make complex ideas approachable. "
+        "Finish with a conclusion that delivers a global message: emphasize how the topic advances the vision of a decentralized knowledge economy, call on readers to consider their role in shaping a fairer, knowledge-driven world, and invite them to join the KBC movement."
+    )
 
     # Use the new chat API (openai>=1.0) via the client
     completion = openai_client.chat.completions.create(
