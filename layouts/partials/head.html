@@ -22,7 +22,18 @@
 
 {{- /* Open Graph / Twitter */ -}}
 <meta property="og:site_name" content="{{ .Site.Title }}">
-<meta property="og:title" content="{{ with .Params.ogTitle }}{{ . }}{{ else if .Title }}{{ .Title }}{{ else }}{{ .Site.Title }}{{ end }}">
+{{- /* Titles for OG/Twitter (avoid "with ... else if" which is invalid) */ -}}
+{{- $pageTitle := .Site.Title -}}
+{{- if .Title -}}{{ $pageTitle = .Title }}{{- end -}}
+
+{{- $ogTitle := $pageTitle -}}
+{{- with .Params.ogTitle -}}{{ $ogTitle = . }}{{- end -}}
+
+{{- $twTitle := $pageTitle -}}
+{{- with .Params.twitterTitle -}}{{ $twTitle = . }}{{- end -}}
+
+<meta property="og:title" content="{{ $ogTitle }}">
+<meta name="twitter:title" content="{{ $twTitle }}">
 <meta property="og:description" content="{{ $desc | default .Site.Params.description | plainify | html }}">
 <meta property="og:url" content="{{ .Permalink }}">
 
