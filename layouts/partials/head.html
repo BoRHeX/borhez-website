@@ -27,7 +27,9 @@
 <meta property="og:description" content="{{ $desc | default .Site.Params.description | plainify | html }}">
 <meta property="og:url" content="{{ .Permalink }}">
 {{- /* OG type: article for pages with date, otherwise website */ -}}
-<meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+{{- $ogType := "website" -}}
+{{- if .IsPage -}}{{ $ogType = "article" }}{{- end -}}
+<meta property="og:type" content="{{ $ogType }}">
 
 {{- /* choose image - page param, site param, or omit */ -}}
 {{ with or .Params.images (slice .Params.image) (slice .Site.Params.social.image) }}
