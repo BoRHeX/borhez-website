@@ -54,7 +54,7 @@
 {{- $twCard := "summary" -}}
 {{- if $img -}}{{ $twCard = "summary_large_image" }}{{- end -}}
 <meta name="twitter:card" content="{{ $twCard }}">
-<meta name="twitter:title" content="{{ with .Params.twitterTitle }}{{ . }}{{ else if .Title }}{{ .Title }}{{ else }}{{ .Site.Title }}{{ end }}">
+<meta name="twitter:title" content="{{ with .Params.twitterTitle }}{{ . }}{{ else }}{{ if .Title }}{{ .Title }}{{ else }}{{ .Site.Title }}{{ end }}{{ end }}">
 <meta name="twitter:description" content="{{ $desc | plainify | html }}">
 
 {{- /* CSS: prefer Hugo resources fingerprinting; fallback to static css */ -}}
