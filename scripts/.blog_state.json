@@ -131,6 +131,10 @@
     {
       "topic": "Governance & Validation Markets",
       "date": "2026-01-25"
+    },
+    {
+      "topic": "Sybil Resistance Techniques",
+      "date": "2026-01-25"
     }
   ]
 }
