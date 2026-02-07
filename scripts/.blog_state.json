@@ -235,6 +235,10 @@
     {
       "topic": "Regulatory Landscape for KBC",
       "date": "2026-02-07"
+    },
+    {
+      "topic": "KBC MVS (FastAPI + Streamlit)",
+      "date": "2026-02-07"
     }
   ]
 }
