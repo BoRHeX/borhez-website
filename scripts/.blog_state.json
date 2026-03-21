@@ -567,6 +567,10 @@
     {
       "topic": "Attestation and Verification",
       "date": "2026-03-20"
+    },
+    {
+      "topic": "Impact of LLMs on Knowledge Validation",
+      "date": "2026-03-21"
     }
   ]
 }
