@@ -1,11 +1,9 @@
 name: Blog automation
 
 on:
-  # Allow manual triggering via the Actions tab
+  # Manual trigger only. The twice-daily cron schedule was disabled
+  # to stop repeated failed GitHub Actions email notifications.
   workflow_dispatch:
-  # Run twice daily at 06:00 and 18:00 UTC
-  schedule:
-    - cron: '0 6,18 * * *'
 
 # Grant the job permission to push changes back to the repository
 permissions:
